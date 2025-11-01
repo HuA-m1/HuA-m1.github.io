@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>HuAmI</title>
+  
+  
+  <link href="http://example.com/rss.xml" rel="self"/>
+  
+  <link href="http://example.com/"/>
+  <updated>2025-11-01T08:20:54.666Z</updated>
+  <id>http://example.com/</id>
+  
+  <author>
+    <name>John Doe</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Block-chain Signln</title>
+    <link href="http://example.com/2025/10/28/Blockchain%20%20SignIn/"/>
+    <id>http://example.com/2025/10/28/Blockchain%20%20SignIn/</id>
+    <published>2025-10-28T04:12:57.000Z</published>
+    <updated>2025-11-01T08:20:54.666Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="Block-chain-Signln"><a href="#Block-chain-Signln" class="headerlink" title="Block-chain  Signln"></a><em><strong>Block-chain  Signln</strong></em></h1><from geekchallenge><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163022356.png" alt="img"></p><p>题目给了我们区块hash，我们可以查询~<em><strong><a class="link" href="https://sepolia.etherscan.io/">TESTNET Sepolia (ETH) Blockchain Explorer<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163110698.png" alt="img"></p><p>根据hash查询交易信息</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163114779.png" alt="img"></p><p>这里click to SHOW MORE</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163120495.png" alt="img"></p><p>发现一个INPUT DATA是hex转一下，得到flag。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163124653.png" alt="img"></p><p>☆<em>: .｡. o(≧▽≦)o .｡.:</em>☆《<del>☆</del>》<em>: .｡. o(≧▽≦)o .｡.:</em>☆ </p></from>]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Block-chain-Signln&quot;&gt;&lt;a href=&quot;#Block-chain-Signln&quot; class=&quot;headerlink&quot; title=&quot;Block-chain  Signln&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Block-chain  Signln&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;from geekchallenge&gt;
+
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163022356.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+&lt;p&gt;题目给了我们区块hash，我们可以查询~&lt;em&gt;&lt;strong&gt;&lt;a class=&quot;link&quot; href=&quot;https://sepolia.etherscan.io/&quot;&gt;TESTNET Sepolia (ETH) Blockchain Explorer&lt;i class=&quot;fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon&quot;&gt;&lt;/i&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163110698.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+&lt;p&gt;根据hash查询交易信息&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163114779.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+&lt;p&gt;这里click to SHOW MORE&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163120495.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+&lt;p&gt;发现一个INPUT DATA是hex转一下，得到flag。&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163124653.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+&lt;p&gt;☆&lt;em&gt;: .｡. o(≧▽≦)o .｡.:&lt;/em&gt;☆《&lt;del&gt;☆&lt;/del&gt;》&lt;em&gt;: .｡. o(≧▽≦)o .｡.:&lt;/em&gt;☆ &lt;/p&gt;
+&lt;/from&gt;</summary>
+    
+    
+    
+    <category term="Blockchain" scheme="http://example.com/categories/Blockchain/"/>
+    
+    
+    <category term="CTF" scheme="http://example.com/tags/CTF/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>traffic 1</title>
+    <link href="http://example.com/2025/10/28/GFSJ_traffic1/"/>
+    <id>http://example.com/2025/10/28/GFSJ_traffic1/</id>
+    <published>2025-10-28T04:12:57.000Z</published>
+    <updated>2025-11-01T08:23:49.639Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="traffic-1"><a href="#traffic-1" class="headerlink" title="traffic 1"></a><em><strong>traffic 1</strong></em></h1><p><em><from gfsj_misc_traffic analysis></from></em></p><p>有tcp无http，怀疑tls</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103420190.png" alt="img"></p><p>过滤tls</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103424488.png" alt="img"></p><p>大量tlsv1.2协议。</p><p>发现Encrypt字段，怀疑解密。</p><p>搜索key没有发现，再看了看发现有ftp协议，看看什么模式。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png" alt="img"></p><p>不管了直接搜ftp-data协议（主动模式下无ftp-data数据包，被动模式有）</p><p>传输了大量key.log文件</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png" alt="img"></p><p>追踪流。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103432448.png" alt="img"></p><p>每一行都以 <code>CLIENT_RANDOM</code> 开头，后面跟着两个长串的十六进制字符串。这是典型的 <strong>TLS（传输层安全协议）密钥日志格式</strong>，用于解密  加密流量。</p><p>我们导出保存为key.log</p><p>之后对加密流量包解密。进入<em><strong>编辑 → 首选项 → 协议 → TLS</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103436331.png" alt="img"></p><p>点击应用完成解密。如果解密不成功可以试试把debug file添加上。</p><p>解密成功。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103439925.png" alt="img"></p><p>导出http。</p><p>文件有点多，我们可以选择可疑的导出。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103443960.png" alt="img"></p><p>这里有个zip导出一下。发现是一个音频。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103448382.png" alt="img"></p><p>尾部有噪音。Audacity打开。</p><p>频谱图看一下尾部。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103452336.png" alt="img"></p><p>发现是key不是flag，说明我们遗漏了什么东西。回头看看。</p><p>不管了，这里直接binwalk+foremost一下。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103457987.png" alt="img"></p><p>分理出2个压缩包。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103503383.png" alt="img"></p><p>输入刚才的key</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103507403.png" alt="img"></p><p>得到flag：<em><strong>flag{4sun0_y0zora_sh0ka1h@n_#&gt;&gt;&lt;&lt;#}</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103512520.png" alt="img"></p><p>○( ＾皿＾)っHiahiahia…</p>]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;traffic-1&quot;&gt;&lt;a href=&quot;#traffic-1&quot; class=&quot;headerlink&quot; title=&quot;traffic 1&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;traffic 1&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from gfsj_misc_traffic analysis&gt;&lt;/from&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;有tcp无http，怀疑tls&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103420190.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+&lt;p&gt;过滤tls&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103424488.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+&lt;p&gt;大量tlsv1.2协议。&lt;/p&gt;
+&lt;p&gt;发现Encrypt字段，怀疑解密。&lt;/p&gt;
+&lt;p&gt;搜索key没有发现，再看了看发现有ftp协议，看看什么模式。&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Forensics" scheme="http://example.com/categories/Forensics/"/>
+    
+    
+    <category term="CTF" scheme="http://example.com/tags/CTF/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>evil_mcp</title>
+    <link href="http://example.com/2025/10/28/evil_mcp/"/>
+    <id>http://example.com/2025/10/28/evil_mcp/</id>
+    <published>2025-10-28T04:12:57.000Z</published>
+    <updated>2025-11-01T08:22:49.932Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="evil-mcp"><a href="#evil-mcp" class="headerlink" title="evil_mcp"></a><em><strong>evil_mcp</strong></em></h1><p><em><from geekchallenge></from></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105202206.png" alt="img"></p><p><strong>ez_AI</strong>：打开环境</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105205382.png" alt="img"></p><p><em>这里思路是编写一个脚本注入获取flag</em></p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">from typing import Any<br><br>@tool(<br>    name=&quot;get_flag&quot;,<br>    description=&quot;Get the flag from the server&quot;,<br>    input_schema=&#123;<br>        &quot;type&quot;: &quot;object&quot;,<br>        &quot;properties&quot;: &#123;&#125;,<br>        &quot;required&quot;: []<br>    &#125;<br>)<br>async def get_flag(arguments: dict[str, Any], context: Any) -&gt; Any:<br>    &quot;&quot;&quot;Get the flag.&quot;&quot;&quot;<br>    with open(&#x27;/flag&#x27;, &#x27;r&#x27;) as f:<br>        content = f.read()<br>    return content<br></code></pre></td></tr></table></figure></div><p>粘贴进MCP工具代码框，保存并加载工具。</p><p>最后get_flag就行。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105210043.png" alt="img"></p><p>☆<em>: .｡. o(≧▽≦)o .｡.:</em>☆喔耶!</p>]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;evil-mcp&quot;&gt;&lt;a href=&quot;#evil-mcp&quot; class=&quot;headerlink&quot; title=&quot;evil_mcp&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;evil_mcp&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from geekchallenge&gt;&lt;/from&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105202206.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ez_AI&lt;/strong&gt;：打开环境&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105205382.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;这里思路是编写一个脚本注入获取flag&lt;/em&gt;&lt;/p&gt;
+&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;from typing import Any&lt;br&gt;&lt;br&gt;@tool(&lt;br&gt;    name=&amp;quot;get_flag&amp;quot;,&lt;br&gt;    description=&amp;quot;Get the flag from the server&amp;quot;,&lt;br&gt;    input_schema=&amp;#123;&lt;br&gt;        &amp;quot;type&amp;quot;: &amp;quot;object&amp;quot;,&lt;br&gt;        &amp;quot;properties&amp;quot;: &amp;#123;&amp;#125;,&lt;br&gt;        &amp;quot;required&amp;quot;: []&lt;br&gt;    &amp;#125;&lt;br&gt;)&lt;br&gt;async def get_flag(arguments: dict[str, Any], context: Any) -&amp;gt; Any:&lt;br&gt;    &amp;quot;&amp;quot;&amp;quot;Get the flag.&amp;quot;&amp;quot;&amp;quot;&lt;br&gt;    with open(&amp;#x27;/flag&amp;#x27;, &amp;#x27;r&amp;#x27;) as f:&lt;br&gt;        content = f.read()&lt;br&gt;    return content&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
+
+&lt;p&gt;粘贴进MCP工具代码框，保存并加载工具。&lt;/p&gt;
+&lt;p&gt;最后get_flag就行。&lt;/p&gt;
+&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105210043.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="AI" scheme="http://example.com/categories/AI/"/>
+    
+    
+    <category term="CTF" scheme="http://example.com/tags/CTF/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ESP定律</title>
+    <link href="http://example.com/2025/10/28/%E8%84%B1%E5%A3%B3ESP%EF%BC%88%E6%89%A9%E5%B1%95%E6%A0%88%E6%8C%87%E9%92%88%EF%BC%89%E5%AE%9A%E5%BE%8B/"/>
+    <id>http://example.com/2025/10/28/%E8%84%B1%E5%A3%B3ESP%EF%BC%88%E6%89%A9%E5%B1%95%E6%A0%88%E6%8C%87%E9%92%88%EF%BC%89%E5%AE%9A%E5%BE%8B/</id>
+    <published>2025-10-28T04:12:57.000Z</published>
+    <updated>2025-11-01T08:23:55.342Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="ESP（扩展栈指针）"><a href="#ESP（扩展栈指针）" class="headerlink" title="ESP（扩展栈指针）"></a><em><strong>ESP（扩展栈指针）</strong></em></h1><p><em><strong>principle：</strong></em></p><p>*在程序执行过程中，栈的操作与函数调用、局部变量存储等密切相关。当程序执行到某个函数调用时，会将函数的参数、返回地址等信息压入栈中，而 ESP 则始终指向栈顶。*<em><strong>X86 exp寄存器存储的是当前栈顶的内存地址。</strong></em></p><p><em><strong>Function：</strong></em></p><p>ESP 定律的核心原理基于栈的平衡机制。在一些情况下，特别是在加密程序或存在代码保护机制的软件中，程序可能会对自身代码进行加密或混淆处理，使得直接分析原始代码变得困难。然而，<strong>当程序执行到特定关键代码段（如解密后的代码部分）时，通常会涉及到栈的操作，导致 ESP 的值发生有规律的变化</strong>。通过<strong>监测 ESP 的值变化，我们可以找到这些关键代码的执行点</strong>。</p><p><em><strong>CPP：</strong></em></p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">`#include &lt;iostream&gt;`<br><br>`void encryptedFunction() &#123;`<br>`// 这里假设是一些加密后的代码逻辑`<br>`std::cout &lt;&lt; &quot;This is the encrypted part of the code.&quot; &lt;&lt; std::endl;`<br>`&#125;`<br><br>`int main() &#123;`<br>`// 调用加密函数前的栈状态`<br>`int localVar1 = 10;`<br>`int localVar2 = 20;`<br><br><br>encryptedFunction();<br><br>// 调用加密函数后的栈状态<br>std::cout &lt;&lt; &quot;After the function call, localVar1: &quot; &lt;&lt; localVar1 &lt;&lt; &quot;, localVar2: &quot; &lt;&lt; localVar2 &lt;&lt; std::endl;<br><br>return 0;<br><br>&#125;<br></code></pre></td></tr></table></figure></div><p><em><strong>个人理解（仅供参考）：</strong></em></p><p><em>ESP（扩展栈指针）</em>：对于调用函数等操作，在对关键代码进行定位查找的困难过程中，可以通过观察ESP的值进行对函数地址的定位，比如程序在调用<strong>encryptedFunction</strong>函数时，会涉及到栈的操作，导致 ESP 的值发生有规律的变化。通过监测 ESP 的值变化，我们可以找到这些关键代码的执行点。</p><p><em><strong>Example：</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104434071.png" alt="img"></p><p><strong>我创建了一个简单的PE文件，并对其进行基础加壳upx -d  project1.exe</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104438830.png" alt="img"></p><p><strong>接着对upx特征段进行篡改使其无法被基础脱壳掉。如下图</strong>：</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104443152.png" alt="img"></p><p><strong>然后针对此类加壳我们可以用esp定律进行动态调试来完成脱壳。</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104446580.png" alt="img"></p><p>首先单步调试，发现ESP寄存器出大红（<strong>ESP 寄存器变红表示栈指针（Stack Pointer）的值发生了异常或不一致，可能触发了栈平衡错误。</strong>）</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104449794.png" alt="img"></p><p><strong>将内存窗口的显示定位到与该寄存器值相关的内存地址处，方便查看对应内存地址中的数据。</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104453237.png" alt="img"></p><p><strong>任意字符下硬件断点</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104456305.png" alt="img"></p><p><strong>run to line(jmp project.6c1023)，找到[OEP]（ 程序的入口点 ）</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104459583.png" alt="img"></p><p><strong>设置EIP，收工。</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104503551.png" alt="img"></p><p><strong>最后dump下来，检验一下。</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104507280.png" alt="img"></p><p><strong>脱壳成功！</strong>🙌🙌🙌</p>]]></content>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;ESP（扩展栈指针）&quot;&gt;&lt;a href=&quot;#ESP（扩展栈指针）&quot; class=&quot;headerlink&quot; title=&quot;ESP（扩展栈指针）&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;ESP（扩展栈指针）&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;strong&gt;principle：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;*在程序执行过程中，栈的操作与函数调用、局部变量存储等密切相关。当程序执行到某个函数调用时，会将函数的参数、返回地址等信息压入栈中，而 ESP 则始终指向栈顶。*&lt;em&gt;&lt;strong&gt;X86 exp寄存器存储的是当前栈顶的内存地址。&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;Function：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;ESP 定律的核心原理基于栈的平衡机制。在一些情况下，特别是在加密程序或存在代码保护机制的软件中，程序可能会对自身代码进行加密或混淆处理，使得直接分析原始代码变得困难。然而，&lt;strong&gt;当程序执行到特定关键代码段（如解密后的代码部分）时，通常会涉及到栈的操作，导致 ESP 的值发生有规律的变化&lt;/strong&gt;。通过&lt;strong&gt;监测 ESP 的值变化，我们可以找到这些关键代码的执行点&lt;/strong&gt;。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;CPP：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;`#include &amp;lt;iostream&amp;gt;`&lt;br&gt;&lt;br&gt;`void encryptedFunction() &amp;#123;`&lt;br&gt;`// 这里假设是一些加密后的代码逻辑`&lt;br&gt;`std::cout &amp;lt;&amp;lt; &amp;quot;This is the encrypted part of the code.&amp;quot; &amp;lt;&amp;lt; std::endl;`&lt;br&gt;`&amp;#125;`&lt;br&gt;&lt;br&gt;`int main() &amp;#123;`&lt;br&gt;`// 调用加密函数前的栈状态`&lt;br&gt;`int localVar1 = 10;`&lt;br&gt;`int localVar2 = 20;`&lt;br&gt;&lt;br&gt;&lt;br&gt;encryptedFunction();&lt;br&gt;&lt;br&gt;// 调用加密函数后的栈状态&lt;br&gt;std::cout &amp;lt;&amp;lt; &amp;quot;After the function call, localVar1: &amp;quot; &amp;lt;&amp;lt; localVar1 &amp;lt;&amp;lt; &amp;quot;, localVar2: &amp;quot; &amp;lt;&amp;lt; localVar2 &amp;lt;&amp;lt; std::endl;&lt;br&gt;&lt;br&gt;return 0;&lt;br&gt;&lt;br&gt;&amp;#125;&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
+
+
+
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;个人理解（仅供参考）：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;ESP（扩展栈指针）&lt;/em&gt;：对于调用函数等操作，在对关键代码进行定位查找的困难过程中，可以通过观察ESP的值进行对函数地址的定位，比如程序在调用&lt;strong&gt;encryptedFunction&lt;/strong&gt;函数时，会涉及到栈的操作，导致 ESP 的值发生有规律的变化。通过监测 ESP 的值变化，我们可以找到这些关键代码的执行点。&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;Example：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;</summary>
+    
+    
+    
+    <category term="Reverse" scheme="http://example.com/categories/Reverse/"/>
+    
+    
+    <category term="CTF" scheme="http://example.com/tags/CTF/"/>
+    
+  </entry>
+  
+</feed>
