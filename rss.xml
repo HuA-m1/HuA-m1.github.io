@@ -65,30 +65,6 @@
   </entry>
   
   <entry>
-    <title>traffic 1</title>
-    <link href="http://example.com/2025/10/28/GFSJ_traffic1/"/>
-    <id>http://example.com/2025/10/28/GFSJ_traffic1/</id>
-    <published>2025-10-28T04:12:57.000Z</published>
-    <updated>2025-11-03T06:21:13.062Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="traffic-1"><a href="#traffic-1" class="headerlink" title="traffic 1"></a><em><strong>traffic 1</strong></em></h1><p><em><from gfsj_misc_traffic analysis></from></em></p><p>有tcp无http，怀疑tls</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103420190.png" alt="img"></p><p>过滤tls</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103424488.png" alt="img"></p><p>大量tlsv1.2协议。</p><p>发现Encrypt字段，怀疑解密。</p><p>搜索key没有发现，再看了看发现有ftp协议，看看什么模式。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png" alt="img"></p><p>不管了直接搜ftp-data协议（主动模式下无ftp-data数据包，被动模式有）</p><p>传输了大量key.log文件</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png" alt="img"></p><p>追踪流。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103432448.png" alt="img"></p><p>每一行都以 <code>CLIENT_RANDOM</code> 开头，后面跟着两个长串的十六进制字符串。这是典型的 <strong>TLS（传输层安全协议）密钥日志格式</strong>，用于解密  加密流量。</p><p>我们导出保存为key.log</p><p>之后对加密流量包解密。进入<em><strong>编辑 → 首选项 → 协议 → TLS</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103436331.png" alt="img"></p><p>点击应用完成解密。如果解密不成功可以试试把debug file添加上。</p><p>解密成功。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103439925.png" alt="img"></p><p>导出http。</p><p>文件有点多，我们可以选择可疑的导出。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103443960.png" alt="img"></p><p>这里有个zip导出一下。发现是一个音频。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103448382.png" alt="img"></p><p>尾部有噪音。Audacity打开。</p><p>频谱图看一下尾部。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103452336.png" alt="img"></p><p>发现是key不是flag，说明我们遗漏了什么东西。回头看看。</p><p>不管了，这里直接binwalk+foremost一下。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103457987.png" alt="img"></p><p>分理出2个压缩包。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103503383.png" alt="img"></p><p>输入刚才的key</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103507403.png" alt="img"></p><p>得到flag：<em><strong>flag{4sun0_y0zora_sh0ka1h@n_#&gt;&gt;&lt;&lt;#}</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103512520.png" alt="img"></p><p>○( ＾皿＾)っHiahiahia…</p>]]></content>
-    
-    
-      
-      
-    <summary type="html">&lt;h1 id=&quot;traffic-1&quot;&gt;&lt;a href=&quot;#traffic-1&quot; class=&quot;headerlink&quot; title=&quot;traffic 1&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;traffic 1&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from gfsj_m</summary>
-      
-    
-    
-    
-    <category term="Forensics" scheme="http://example.com/categories/Forensics/"/>
-    
-    
-    <category term="CTF" scheme="http://example.com/tags/CTF/"/>
-    
-  </entry>
-  
-  <entry>
     <title>ESP定律</title>
     <link href="http://example.com/2025/10/28/%E8%84%B1%E5%A3%B3ESP%EF%BC%88%E6%89%A9%E5%B1%95%E6%A0%88%E6%8C%87%E9%92%88%EF%BC%89%E5%AE%9A%E5%BE%8B/"/>
     <id>http://example.com/2025/10/28/%E8%84%B1%E5%A3%B3ESP%EF%BC%88%E6%89%A9%E5%B1%95%E6%A0%88%E6%8C%87%E9%92%88%EF%BC%89%E5%AE%9A%E5%BE%8B/</id>
@@ -106,6 +82,30 @@
     
     
     <category term="Reverse" scheme="http://example.com/categories/Reverse/"/>
+    
+    
+    <category term="CTF" scheme="http://example.com/tags/CTF/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>traffic 1</title>
+    <link href="http://example.com/2025/10/28/GFSJ_traffic1/"/>
+    <id>http://example.com/2025/10/28/GFSJ_traffic1/</id>
+    <published>2025-10-28T04:12:57.000Z</published>
+    <updated>2025-11-03T06:21:13.062Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="traffic-1"><a href="#traffic-1" class="headerlink" title="traffic 1"></a><em><strong>traffic 1</strong></em></h1><p><em><from gfsj_misc_traffic analysis></from></em></p><p>有tcp无http，怀疑tls</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103420190.png" alt="img"></p><p>过滤tls</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103424488.png" alt="img"></p><p>大量tlsv1.2协议。</p><p>发现Encrypt字段，怀疑解密。</p><p>搜索key没有发现，再看了看发现有ftp协议，看看什么模式。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png" alt="img"></p><p>不管了直接搜ftp-data协议（主动模式下无ftp-data数据包，被动模式有）</p><p>传输了大量key.log文件</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png" alt="img"></p><p>追踪流。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103432448.png" alt="img"></p><p>每一行都以 <code>CLIENT_RANDOM</code> 开头，后面跟着两个长串的十六进制字符串。这是典型的 <strong>TLS（传输层安全协议）密钥日志格式</strong>，用于解密  加密流量。</p><p>我们导出保存为key.log</p><p>之后对加密流量包解密。进入<em><strong>编辑 → 首选项 → 协议 → TLS</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103436331.png" alt="img"></p><p>点击应用完成解密。如果解密不成功可以试试把debug file添加上。</p><p>解密成功。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103439925.png" alt="img"></p><p>导出http。</p><p>文件有点多，我们可以选择可疑的导出。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103443960.png" alt="img"></p><p>这里有个zip导出一下。发现是一个音频。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103448382.png" alt="img"></p><p>尾部有噪音。Audacity打开。</p><p>频谱图看一下尾部。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103452336.png" alt="img"></p><p>发现是key不是flag，说明我们遗漏了什么东西。回头看看。</p><p>不管了，这里直接binwalk+foremost一下。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103457987.png" alt="img"></p><p>分理出2个压缩包。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103503383.png" alt="img"></p><p>输入刚才的key</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103507403.png" alt="img"></p><p>得到flag：<em><strong>flag{4sun0_y0zora_sh0ka1h@n_#&gt;&gt;&lt;&lt;#}</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103512520.png" alt="img"></p><p>○( ＾皿＾)っHiahiahia…</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;traffic-1&quot;&gt;&lt;a href=&quot;#traffic-1&quot; class=&quot;headerlink&quot; title=&quot;traffic 1&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;traffic 1&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from gfsj_m</summary>
+      
+    
+    
+    
+    <category term="Forensics" scheme="http://example.com/categories/Forensics/"/>
     
     
     <category term="CTF" scheme="http://example.com/tags/CTF/"/>
