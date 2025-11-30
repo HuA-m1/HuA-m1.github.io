@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="Hexo Theme Redefine">
+    
+    <meta name="author" content="HuAmI">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="http://example.com/2025/11/27/ubifs及案例/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="UBIFS">
+<meta property="og:url" content="http://example.com/2025/11/27/UBIFS%E5%8F%8A%E6%A1%88%E4%BE%8B/index.html">
+<meta property="og:site_name" content="HuAmI">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/redefine-og.webp">
+<meta property="article:published_time" content="2025-11-27T04:12:57.000Z">
+<meta property="article:modified_time" content="2025-11-27T01:33:20.850Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Basics">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/redefine-favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/redefine-favicon.svg">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="/images/redefine-favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            UBIFS | HuAmI
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"example.com","root":"/","language":"en","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":true,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null},"title":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":false,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/wallhaven-wqery6-light.webp","dark":"/images/wallhaven-wqery6-dark.webp"},"title":"HuAmIの小さな巣","subtitle":{"text":["こんにちは<br>私のブログへようこそ<br>(〃￣︶￣)人(￣︶￣〃)"],"hitokoto":{"enable":false,"show_author":true,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#c0c0c0","dark":"#909090"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":false,"style":"default","links":{"github":null,"instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Categories":{"icon":"fa-regular fa-folder","path":"/categories","submenus":{"AI":"/categories/AI","Blockchain":"/categories/Blockchain","Forensics":"/categories/Forensics","Reverse":"/categories/Reverse","Preferences":"/categories/Preferences","Basics":"/categories/Basics","Error":"/categories/Error"}},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Links":{"path":"/link","icon":"fa-regular fa-link"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"info","announcement":null,"show_on_mobile":true,"links":{"tags":{"path":"/tags","icon":"fa-regular fa-tags"},"links":{"path":"/links","icon":"fa-regular fa-link"},"photos":{"path":"/masonry","icon":"fa-solid fa-image"},"archives":{"path":"/archives","icon":"fa-regular fa-archive"}}},"article_date_format":"auto","excerpt_length":80,"categories":{"enable":true,"limit":10},"tags":{"enable":true,"limit":20}},"footerStart":"2025/10/28 00:00:00"};
+    window.lang_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
+    window.data = {"masonry":true};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 8.0.0"><link rel="alternate" href="/rss.xml" title="HuAmI" type="application/atom+xml">
+</head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                HuAmI
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    HOME
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class="has-dropdown"
+                                   href="#"
+                                        onClick=&#34;return false;&#34;>
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    CATEGORIES
+                                    <i class="fa-solid fa-chevron-down fa-fw"></i>
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                                    <ul class="sub-menu">
+                                        
+                                            <li>
+                                                <a href="/categories/AI">
+                                                    AI
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Blockchain">
+                                                    BLOCKCHAIN
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Forensics">
+                                                    FORENSICS
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Reverse">
+                                                    REVERSE
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Preferences">
+                                                    PREFERENCES
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Basics">
+                                                    BASICS
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Error">
+                                                    ERROR
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    ARCHIVES
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/link"
+                                        >
+                                    <i class="fa-regular fa-link fa-fw"></i>
+                                    LINKS
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                HOME
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item-sub text-base my-1.5 flex flex-col w-full">
+                        
+                        <div class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary cursor-pointer text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                             navbar-data-toggle="submenu-Categories"
+                        >
+                            <span>
+                                CATEGORIES
+                            </span>
+                            
+                                <i class="fa-solid fa-chevron-right fa-sm fa-fw transition-all"></i>
+                            
+                        </div>
+                        
+
+                        
+                            <div class="flex-col items-start px-2 py-2 hidden" data-target="submenu-Categories">
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/AI">AI</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Blockchain">BLOCKCHAIN</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Forensics">FORENSICS</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Reverse">REVERSE</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Preferences">PREFERENCES</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Basics">BASICS</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Error">ERROR</a>
+                                    </div>
+                                
+                            </div>
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                ARCHIVES
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/link"
+                        >
+                            <span>
+                                LINKS
+                            </span>
+                            
+                                <i class="fa-regular fa-link fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/tags"
+                        >
+                            <span>Tags</span>
+                            <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                        </a>
+                    </li>
+                
+                    
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/links"
+                        >
+                            <span>Links</span>
+                            <i class="fa-regular fa-link fa-sm fa-fw"></i>
+                        </a>
+                    </li>
+                
+                    
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/masonry"
+                        >
+                            <span>photos</span>
+                            <i class="fa-solid fa-image fa-sm fa-fw"></i>
+                        </a>
+                    </li>
+                
+                    
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/archives"
+                        >
+                            <span>Archives</span>
+                            <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                        </a>
+                    </li>
+                
+            
+        </ul>
+
+        <div class="statistics"></div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251127090747650.png" alt="UBIFS" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">UBIFS</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/redefine-avatar.svg">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">HuAmI</span>
+					
+					<span class="author-label ml-1.5 text-xs px-2 py-0.5 rounded-small text-third-text-color border border-shadow-color-1">Lv2</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2025-11-27 12:12:57</span>
+        <span class="mobile">2025-11-27 12:12:57</span>
+        <span class="hover-info">Created</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2025-11-27 09:33:20</span>
+            <span class="mobile">2025-11-27 09:33:20</span>
+            <span class="hover-info">Updated</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/Basics/">Basics</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/Basics/">Basics</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<p><strong>UBIFS</strong>（Unsorted Block Image File System）是针对闪存设备设计的文件系统。我详细介绍一下UBIFS镜像的处理和分析：</p>
+<h2 id="UBIFS-概述"><a href="#UBIFS-概述" class="headerlink" title="UBIFS 概述"></a>UBIFS 概述</h2><h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a><strong>特点</strong></h3><ul>
+<li>专为<strong>原始闪存设备</strong>设计</li>
+<li>支持<strong>磨损均衡</strong>、<strong>坏块管理</strong></li>
+<li>提供<strong>数据压缩</strong>、<strong>数据完整性</strong></li>
+<li>用于嵌入式Linux系统</li>
+</ul>
+<h2 id="UBIFS镜像结构"><a href="#UBIFS镜像结构" class="headerlink" title="UBIFS镜像结构"></a>UBIFS镜像结构</h2><h3 id="镜像组成"><a href="#镜像组成" class="headerlink" title="镜像组成"></a><strong>镜像组成</strong></h3><p>text</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">UBIFS镜像 → UBI卷 → UBIFS文件系统<br>    ↓           ↓           ↓<br>  .ubif文件  包含多个  实际文件系统<br>             物理擦除块<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="层次结构"><a href="#层次结构" class="headerlink" title="层次结构"></a><strong>层次结构</strong></h3><p>text</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Raw Flash<br>    ↓<br>MTD (Memory Technology Device) <br>    ↓  <br>UBI (Unsorted Block Images)<br>    ↓<br>UBIFS (File System)<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="处理UBIFS镜像的工具"><a href="#处理UBIFS镜像的工具" class="headerlink" title="处理UBIFS镜像的工具"></a>处理UBIFS镜像的工具</h2><h3 id="主要工具集"><a href="#主要工具集" class="headerlink" title="主要工具集"></a><strong>主要工具集</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># MTD工具<br>mtdinfo, flash_erase, nandwrite<br><br># UBI工具  <br>ubinize, ubiformat, ubiattach<br><br># UBIFS工具<br>mkfs.ubifs, ubirmvol, ubiupdatevol<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="镜像提取和分析步骤"><a href="#镜像提取和分析步骤" class="headerlink" title="镜像提取和分析步骤"></a>镜像提取和分析步骤</h2><h3 id="1-识别镜像类型"><a href="#1-识别镜像类型" class="headerlink" title="1. 识别镜像类型"></a><strong>1. 识别镜像类型</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 检查文件类型<br>file image.ubifs<br>hexdump -C image.ubifs | head -20<br><br># 查找UBI魔术字<br>grep -a &quot;UBI#&quot; image.ubifs<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="2-提取UBI卷"><a href="#2-提取UBI卷" class="headerlink" title="2. 提取UBI卷"></a><strong>2. 提取UBI卷</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 使用ubinfo查看镜像信息<br>ubinfo --image image.ubifs<br><br># 挂载UBIFS镜像<br>sudo modprobe nandsim first_id_byte=0xec second_id_byte=0xa1<br>sudo modprobe ubi mtd=0<br>sudo ubiformat /dev/mtd0 -f image.ubifs<br>sudo ubiattach /dev/ubi_ctrl -m 0<br>sudo mount -t ubifs ubi0:rootfs /mnt/ubifs<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="3-直接解析UBIFS（无需硬件）"><a href="#3-直接解析UBIFS（无需硬件）" class="headerlink" title="3. 直接解析UBIFS（无需硬件）"></a><strong>3. 直接解析UBIFS（无需硬件）</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 使用ubireader提取文件<br>ubireader_extract_files -i image.ubifs -o extracted_files/<br><br># 使用ubidump分析结构<br>ubidump image.ubifs<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="使用UBI工具处理"><a href="#使用UBI工具处理" class="headerlink" title="使用UBI工具处理"></a>使用UBI工具处理</h2><h3 id="创建UBI镜像"><a href="#创建UBI镜像" class="headerlink" title="创建UBI镜像"></a><strong>创建UBI镜像</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 从目录创建UBIFS镜像<br>mkfs.ubifs -r rootfs/ -m 2048 -e 126976 -c 1024 -o ubifs.img<br><br># 创建UBI镜像<br>ubinize -o image.ubifs -m 2048 -p 128KiB ubinize.cfg<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="ubinize配置文件示例"><a href="#ubinize配置文件示例" class="headerlink" title="ubinize配置文件示例"></a><strong>ubinize配置文件示例</strong></h3><p>ini</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[ubifs]<br>mode=ubi<br>image=ubifs.img<br>vol_id=0<br>vol_size=100MiB<br>vol_type=dynamic<br>vol_name=rootfs<br>vol_flags=autoresize<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="编程方式处理UBIFS"><a href="#编程方式处理UBIFS" class="headerlink" title="编程方式处理UBIFS"></a>编程方式处理UBIFS</h2><h3 id="Python处理示例"><a href="#Python处理示例" class="headerlink" title="Python处理示例"></a><strong>Python处理示例</strong></h3><p>python</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">import subprocess<br>import os<br><br>def extract_ubifs(image_path, output_dir):<br>    &quot;&quot;&quot;提取UBIFS镜像内容&quot;&quot;&quot;<br>    if not os.path.exists(output_dir):<br>        os.makedirs(output_dir)<br>    <br>    # 使用ubireader_extract_files<br>    cmd = [&#x27;ubireader_extract_files&#x27;, &#x27;-i&#x27;, image_path, &#x27;-o&#x27;, output_dir]<br>    result = subprocess.run(cmd, capture_output=True, text=True)<br>    <br>    if result.returncode == 0:<br>        print(&quot;UBIFS镜像提取成功&quot;)<br>        return True<br>    else:<br>        print(f&quot;提取失败: &#123;result.stderr&#125;&quot;)<br>        return False<br><br>def analyze_ubifs_structure(image_path):<br>    &quot;&quot;&quot;分析UBIFS结构&quot;&quot;&quot;<br>    # 读取魔术字和基本信息<br>    with open(image_path, &#x27;rb&#x27;) as f:<br>        header = f.read(64)<br>        <br>    print(&quot;镜像头部信息:&quot;)<br>    print(f&quot;魔术字: &#123;header[:4]&#125;&quot;)<br>    print(f&quot;版本: &#123;header[4:8]&#125;&quot;)<br>    print(f&quot;数据偏移: &#123;int.from_bytes(header[8:12], &#x27;little&#x27;)&#125;&quot;)<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="解析UBI头信息"><a href="#解析UBI头信息" class="headerlink" title="解析UBI头信息"></a><strong>解析UBI头信息</strong></h3><p>python</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">import struct<br><br>def parse_ubi_ec_hdr(data):<br>    &quot;&quot;&quot;解析UBI EC头&quot;&quot;&quot;<br>    magic = data[0:4]<br>    version = data[4:8]<br>    ec = struct.unpack(&#x27;&lt;I&#x27;, data[8:12])[0]  # 擦除计数器<br>    vid_hdr_offset = struct.unpack(&#x27;&lt;I&#x27;, data[12:16])[0]<br>    data_offset = struct.unpack(&#x27;&lt;I&#x27;, data[16:20])[0]<br>    <br>    return &#123;<br>        &#x27;magic&#x27;: magic,<br>        &#x27;version&#x27;: version,<br>        &#x27;erase_counter&#x27;: ec,<br>        &#x27;vid_hdr_offset&#x27;: vid_hdr_offset,<br>        &#x27;data_offset&#x27;: data_offset<br>    &#125;<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="在数字取证中的应用"><a href="#在数字取证中的应用" class="headerlink" title="在数字取证中的应用"></a>在数字取证中的应用</h2><h3 id="取证分析步骤"><a href="#取证分析步骤" class="headerlink" title="取证分析步骤"></a><strong>取证分析步骤</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 1. 创建镜像副本<br>dd if=/dev/mtd0 of=flash_dump.bin bs=1M<br><br># 2. 分析MTD分区<br>mtdinfo flash_dump.bin<br><br># 3. 提取UBIFS内容<br>ubireader_extract_images -i flash_dump.bin -o extracted_volumes/<br><br># 4. 文件系统分析<br>ls -la extracted_volumes/<br>find extracted_volumes/ -name &quot;*.conf&quot; -o -name &quot;*.sh&quot;<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="重要数据位置"><a href="#重要数据位置" class="headerlink" title="重要数据位置"></a><strong>重要数据位置</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 配置文件<br>/etc/passwd<br>/etc/shadow<br>/etc/network/interfaces<br><br># 日志文件<br>/var/log/messages<br>/var/log/auth.log<br><br># 用户数据<br>/home/<br>/root/<br>/tmp/<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="常见问题解决"><a href="#常见问题解决" class="headerlink" title="常见问题解决"></a>常见问题解决</h2><h3 id="1-挂载失败"><a href="#1-挂载失败" class="headerlink" title="1. 挂载失败"></a><strong>1. 挂载失败</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 错误: UBI device 0 not found<br>sudo modprobe ubi<br>sudo ubiattach /dev/ubi_ctrl -m 0 -d 0<br><br># 错误: Invalid argument<br># 检查PEB大小是否匹配<br>ubinfo --image image.ubifs<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="2-镜像损坏"><a href="#2-镜像损坏" class="headerlink" title="2. 镜像损坏"></a><strong>2. 镜像损坏</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 尝试修复<br>ubirepair image.ubifs<br><br># 强制挂载<br>sudo ubiformat /dev/mtd0 -f image.ubifs -s 2048<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="高级分析技巧"><a href="#高级分析技巧" class="headerlink" title="高级分析技巧"></a>高级分析技巧</h2><h3 id="恢复删除文件"><a href="#恢复删除文件" class="headerlink" title="恢复删除文件"></a><strong>恢复删除文件</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># UBIFS删除文件恢复较难，但可以尝试：<br># 1. 扫描原始镜像字符串<br>strings flash_dump.bin | grep -i &quot;password&quot;<br><br># 2. 分析未分配擦除块<br>ubireader_display -i image.ubifs<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="时间线分析"><a href="#时间线分析" class="headerlink" title="时间线分析"></a><strong>时间线分析</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 提取文件时间信息<br>find extracted_volumes/ -type f -exec stat &#123;&#125; \; &gt; timeline.txt<br><br># 分析修改时间<br>cat timeline.txt | grep &quot;Modify&quot;<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="实际案例"><a href="#实际案例" class="headerlink" title="实际案例"></a>实际案例</h2><h3 id="路由器固件分析"><a href="#路由器固件分析" class="headerlink" title="路由器固件分析"></a><strong>路由器固件分析</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 下载路由器固件<br>wget http://example.com/firmware.bin<br><br># 提取UBIFS分区<br>binwalk -e firmware.bin<br><br># 分析提取的文件<br>cd _firmware.bin.extracted/<br>ubireader_extract_files -i *.ubifs -o router_fs/<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="嵌入式设备取证"><a href="#嵌入式设备取证" class="headerlink" title="嵌入式设备取证"></a><strong>嵌入式设备取证</strong></h3><p>python</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 自动化分析脚本<br>import os<br>import hashlib<br><br>def analyze_embedded_device(image_path):<br>    &quot;&quot;&quot;分析嵌入式设备镜像&quot;&quot;&quot;<br>    print(&quot;=== UBIFS镜像分析报告 ===&quot;)<br>    <br>    # 1. 基本信息<br>    size = os.path.getsize(image_path)<br>    print(f&quot;镜像大小: &#123;size&#125; bytes&quot;)<br>    <br>    # 2. 提取文件<br>    extract_dir = &quot;extracted_fs&quot;<br>    if extract_ubifs(image_path, extract_dir):<br>        # 3. 分析提取的文件<br>        for root, dirs, files in os.walk(extract_dir):<br>            for file in files:<br>                filepath = os.path.join(root, file)<br>                print(f&quot;找到文件: &#123;filepath&#125;&quot;)<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="工具安装"><a href="#工具安装" class="headerlink" title="工具安装"></a>工具安装</h2><h3 id="Ubuntu-Debian"><a href="#Ubuntu-Debian" class="headerlink" title="Ubuntu&#x2F;Debian"></a><strong>Ubuntu&#x2F;Debian</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo apt update<br>sudo apt install mtd-utils ubi-utils binwalk<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h3 id="CentOS-RHEL"><a href="#CentOS-RHEL" class="headerlink" title="CentOS&#x2F;RHEL"></a><strong>CentOS&#x2F;RHEL</strong></h3><p>bash</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo yum install mtd-utils<br># 需要从源码编译ubi-utils<br>git clone https://github.com/oberhumer/ubi-utils<br>cd ubi-utils &amp;&amp; make<br></code></pre></td></tr></table></figure></div>
+
+
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><strong>UBIFS镜像分析关键点</strong>：</p>
+<p><strong>使用正确的工具链</strong>（mtd-utils, ubi-utils）<br><strong>解层次结构</strong>（MTD→UBI→UBIFS）<br><strong>注意参数匹配</strong>（PEB大小、块大小）</p>
+<p><strong>备份原始镜像</strong>再进行操作</p>
+<p>使用ubi_reader（推荐）<br>bash</p>
+<h3 id="安装ubi-reader"><a href="#安装ubi-reader" class="headerlink" title="安装ubi_reader"></a>安装ubi_reader</h3><p>sudo apt install python3-pip<br>pip3 install ubi_reader</p>
+<h3 id="提取UBI卷信息"><a href="#提取UBI卷信息" class="headerlink" title="提取UBI卷信息"></a>提取UBI卷信息</h3><p>ubinfo –image firmware.ubifs</p>
+<h3 id="显示详细结构"><a href="#显示详细结构" class="headerlink" title="显示详细结构"></a>显示详细结构</h3><p>ubireader_display -i firmware.ubifs</p>
+<h3 id="提取所有文件"><a href="#提取所有文件" class="headerlink" title="提取所有文件"></a>提取所有文件</h3><p>ubireader_extract_files -i firmware.ubifs -o extracted_fs&#x2F;</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>Title:</strong> UBIFS</li>
+        <li><strong>Author:</strong> HuAmI</li>
+        <li><strong>Created at
+                :</strong> 2025-11-27 12:12:57</li>
+        
+            <li>
+                <strong>Updated at
+                    :</strong> 2025-11-27 09:33:20
+            </li>
+        
+        <li>
+            <strong>Link:</strong> https://redefine.ohevan.com/2025/11/27/UBIFS及案例/
+        </li>
+        <li>
+            <strong>
+                License:
+            </strong>
+            
+
+            
+                This work is licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a>.
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/Basics/">#Basics</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2025/11/30/EzUSB/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">EzUSB</span>
+						<span class="post-nav-item">Prev posts</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2025/11/27/DNS%20Courier/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">DNS Courier</span>
+						<span class="post-nav-item">Next posts</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+		<div class="comment-container px-2 sm:px-6 md:px-8 pb-8">
+			<div class="comments-container mt-10 w-full ">
+    <div id="comment-anchor" class="w-full h-2.5"></div>
+    <div class="comment-area-title w-full my-1.5 md:my-2.5 text-xl md:text-3xl font-bold">
+        Comments
+    </div>
+    
+
+        
+            
+    <div id="waline"></div>
+    <script type="module" data-swup-reload-script>
+      import { init } from '/js/libs/waline.js';
+
+      function loadWaline() {
+        init({
+          el: '#waline',
+          serverURL: 'https://example.example.com',
+          dark: 'body[class~="dark-mode"]',
+          reaction: false,
+          requiredMeta: ['nick', 'mail'],
+          emoji: [],
+                    lang: 'zh-CN',
+        });
+      }
+
+      if (typeof swup !== 'undefined') {
+        loadWaline();
+      } else {
+        window.addEventListener('DOMContentLoaded', loadWaline);
+      }
+    </script>
+
+
+
+        
+    
+</div>
+
+		</div>
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">On this page</div>
+		<div class="page-title">UBIFS</div>
+		<ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#UBIFS-%E6%A6%82%E8%BF%B0"><span class="nav-text">UBIFS 概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E7%82%B9"><span class="nav-text">特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#UBIFS%E9%95%9C%E5%83%8F%E7%BB%93%E6%9E%84"><span class="nav-text">UBIFS镜像结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%95%9C%E5%83%8F%E7%BB%84%E6%88%90"><span class="nav-text">镜像组成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="nav-text">层次结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%84%E7%90%86UBIFS%E9%95%9C%E5%83%8F%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="nav-text">处理UBIFS镜像的工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E8%A6%81%E5%B7%A5%E5%85%B7%E9%9B%86"><span class="nav-text">主要工具集</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%95%9C%E5%83%8F%E6%8F%90%E5%8F%96%E5%92%8C%E5%88%86%E6%9E%90%E6%AD%A5%E9%AA%A4"><span class="nav-text">镜像提取和分析步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%AF%86%E5%88%AB%E9%95%9C%E5%83%8F%E7%B1%BB%E5%9E%8B"><span class="nav-text">1. 识别镜像类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8F%90%E5%8F%96UBI%E5%8D%B7"><span class="nav-text">2. 提取UBI卷</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%9B%B4%E6%8E%A5%E8%A7%A3%E6%9E%90UBIFS%EF%BC%88%E6%97%A0%E9%9C%80%E7%A1%AC%E4%BB%B6%EF%BC%89"><span class="nav-text">3. 直接解析UBIFS（无需硬件）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8UBI%E5%B7%A5%E5%85%B7%E5%A4%84%E7%90%86"><span class="nav-text">使用UBI工具处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAUBI%E9%95%9C%E5%83%8F"><span class="nav-text">创建UBI镜像</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ubinize%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%A4%BA%E4%BE%8B"><span class="nav-text">ubinize配置文件示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E6%96%B9%E5%BC%8F%E5%A4%84%E7%90%86UBIFS"><span class="nav-text">编程方式处理UBIFS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Python%E5%A4%84%E7%90%86%E7%A4%BA%E4%BE%8B"><span class="nav-text">Python处理示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90UBI%E5%A4%B4%E4%BF%A1%E6%81%AF"><span class="nav-text">解析UBI头信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%A8%E6%95%B0%E5%AD%97%E5%8F%96%E8%AF%81%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-text">在数字取证中的应用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E8%AF%81%E5%88%86%E6%9E%90%E6%AD%A5%E9%AA%A4"><span class="nav-text">取证分析步骤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%87%8D%E8%A6%81%E6%95%B0%E6%8D%AE%E4%BD%8D%E7%BD%AE"><span class="nav-text">重要数据位置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3"><span class="nav-text">常见问题解决</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8C%82%E8%BD%BD%E5%A4%B1%E8%B4%A5"><span class="nav-text">1. 挂载失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%95%9C%E5%83%8F%E6%8D%9F%E5%9D%8F"><span class="nav-text">2. 镜像损坏</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E5%88%86%E6%9E%90%E6%8A%80%E5%B7%A7"><span class="nav-text">高级分析技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%81%A2%E5%A4%8D%E5%88%A0%E9%99%A4%E6%96%87%E4%BB%B6"><span class="nav-text">恢复删除文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E7%BA%BF%E5%88%86%E6%9E%90"><span class="nav-text">时间线分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E6%A1%88%E4%BE%8B"><span class="nav-text">实际案例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%99%A8%E5%9B%BA%E4%BB%B6%E5%88%86%E6%9E%90"><span class="nav-text">路由器固件分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%AE%BE%E5%A4%87%E5%8F%96%E8%AF%81"><span class="nav-text">嵌入式设备取证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E5%AE%89%E8%A3%85"><span class="nav-text">工具安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Ubuntu-Debian"><span class="nav-text">Ubuntu&#x2F;Debian</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CentOS-RHEL"><span class="nav-text">CentOS&#x2F;RHEL</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85ubi-reader"><span class="nav-text">安装ubi_reader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E5%8F%96UBI%E5%8D%B7%E4%BF%A1%E6%81%AF"><span class="nav-text">提取UBI卷信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E7%A4%BA%E8%AF%A6%E7%BB%86%E7%BB%93%E6%9E%84"><span class="nav-text">显示详细结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E5%8F%96%E6%89%80%E6%9C%89%E6%96%87%E4%BB%B6"><span class="nav-text">提取所有文件</span></a></li></ol></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2025</span>
+              -
+            
+            2025&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>&nbsp;&nbsp;<a href="/">HuAmI</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        10 posts in total
+                    </span>
+                    
+                </p>
+            
+        </div>
+        
+            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
+            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
+                
+                    <span id="busuanzi_container_site_uv" class="lg:!block">
+                        <span class="text-sm">VISITOR COUNT</span>
+                        <span id="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="lg:!block">
+                        <span class="text-sm">TOTAL PAGE VIEWS</span>
+                        <span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">POWERED BY <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://github.com/HuA-m1/HuA-m1.github.io">HuAmI</a></span>
+            <span class="text-sm lg:block">THEME&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+		<li class="go-comment">
+			<i class="fa-regular fa-comments"></i>
+		</li>
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+    
+<script src="/js/build/libs/minimasonry.min.js"></script>
+
+    
+<script src="/js/build/plugins/masonry.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>

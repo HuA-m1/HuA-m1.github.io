@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="keywords" content="Hexo Theme Redefine">
+    
+    <meta name="author" content="HuAmI">
+    
+    <!-- Completely eliminate flash of wrong theme -->
+    <script>
+        (function() {
+            const THEME_KEY = "REDEFINE-THEME-STATUS";
+            const DARK = "dark", LIGHT = "light";
+            
+            // Get preferred theme
+            function getTheme() {
+                try {
+                    const saved = localStorage.getItem(THEME_KEY);
+                    if (saved) {
+                        const { isDark } = JSON.parse(saved);
+                        return isDark ? DARK : LIGHT;
+                    }
+                } catch (e) {}
+                
+                return matchMedia("(prefers-color-scheme: dark)").matches ? DARK : LIGHT;
+            }
+            
+            // Apply theme to document
+            function applyTheme(theme) {
+                const isDark = theme === DARK;
+                const root = document.documentElement;
+                
+                // Set classes for compatibility
+                root.classList.add(theme);
+                root.classList.remove(isDark ? LIGHT : DARK);
+                root.style.colorScheme = theme;
+            }
+            
+            // Initial application
+            const theme = getTheme();
+            applyTheme(theme);
+            
+            // Listen for system preference changes
+            matchMedia("(prefers-color-scheme: dark)").addEventListener("change", ({ matches }) => {
+                // Only update if using system preference (no localStorage entry)
+                if (!localStorage.getItem(THEME_KEY)) {
+                    applyTheme(matches ? DARK : LIGHT);
+                }
+            });
+            
+            // Set body classes ASAP (before DOMContentLoaded)
+            (function() {
+                const addBodyClass = () => {
+                    const b = document.body;
+                    if (!b) return false;
+                    b.classList.add(theme + "-mode");
+                    return true;
+                };
+
+                // Try immediately
+                if (addBodyClass()) return;
+
+                // Observe until body exists
+                const mo = new MutationObserver(() => {
+                    if (addBodyClass()) mo.disconnect();
+                });
+                mo.observe(document.documentElement, { childList: true, subtree: true });
+            })();
+        })();
+    </script>
+    
+    <!-- preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    
+    <!--- Seo Part-->
+    
+    <link rel="canonical" href="http://example.com/2025/11/26/misc-hitbgsec ctf 2017-arrdeepee/"/>
+    <meta name="robots" content="index,follow">
+    <meta name="googlebot" content="index,follow">
+    <meta name="revisit-after" content="1 days">
+    
+    
+    
+        
+        <meta name="description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="攻防世界HITBGSEC CTF 2017 - arrdeepee (Misc)">
+<meta property="og:url" content="http://example.com/2025/11/26/Misc-HITBGSEC%20CTF%202017-arrdeepee/index.html">
+<meta property="og:site_name" content="HuAmI">
+<meta property="og:description" content="Hexo Theme Redefine, Redefine Your Hexo Journey.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/images/redefine-og.webp">
+<meta property="article:published_time" content="2025-11-26T04:12:57.000Z">
+<meta property="article:modified_time" content="2025-11-27T01:33:58.734Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="CTF">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/images/redefine-og.webp">
+    
+    
+    <!--- Icon Part-->
+    <link rel="icon" type="image/png" href="/images/redefine-favicon.svg" sizes="192x192">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/redefine-favicon.svg">
+    <meta name="theme-color" content="#A31F34">
+    <link rel="shortcut icon" href="/images/redefine-favicon.svg">
+    <!--- Page Info-->
+    
+    <title>
+        
+            攻防世界HITBGSEC CTF 2017 - arrdeepee (Misc) | HuAmI
+        
+    </title>
+
+    
+<link rel="stylesheet" href="/fonts/Chillax/chillax.css">
+
+
+    <!--- Inject Part-->
+    
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+        
+<link rel="stylesheet" href="/css/build/tailwind.css">
+
+    
+
+    
+<link rel="stylesheet" href="/fonts/GeistMono/geist-mono.css">
+
+    
+<link rel="stylesheet" href="/fonts/Geist/geist.css">
+
+    <!--- Font Part-->
+    
+    
+    
+    
+    
+    
+
+    <script id="hexo-configurations">
+    window.config = {"hostname":"example.com","root":"/","language":"en","path":"search.json"};
+    window.theme = {"articles":{"style":{"font_size":"16px","line_height":1.5,"image_border_radius":"14px","image_alignment":"center","image_caption":false,"link_icon":true,"delete_mask":false,"title_alignment":"left","headings_top_spacing":{"h1":"3.2rem","h2":"2.4rem","h3":"1.9rem","h4":"1.6rem","h5":"1.4rem","h6":"1.3rem"}},"word_count":{"enable":true,"count":true,"min2read":true},"author_label":{"enable":true,"auto":false,"list":[]},"code_block":{"copy":true,"style":"mac","highlight_theme":{"light":"github","dark":"vs2015"},"font":{"enable":false,"family":null,"url":null}},"toc":{"enable":true,"max_depth":3,"number":false,"expand":true,"init_open":true},"copyright":{"enable":true,"default":"cc_by_nc_sa"},"lazyload":true,"pangu_js":false,"recommendation":{"enable":false,"title":"推荐阅读","limit":3,"mobile_limit":2,"placeholder":"/images/wallhaven-wqery6-light.webp","skip_dirs":[]}},"colors":{"primary":"#A31F34","default_mode":"light"},"global":{"fonts":{"chinese":{"enable":false,"family":null,"url":null},"english":{"enable":false,"family":null,"url":null},"title":{"enable":false,"family":null,"url":null}},"content_max_width":"1000px","sidebar_width":"210px","hover":{"shadow":true,"scale":false},"scroll_progress":{"bar":false,"percentage":true},"website_counter":{"url":"https://cn.vercount.one/js","enable":true,"site_pv":true,"site_uv":true,"post_pv":true},"single_page":true,"preloader":{"enable":false,"custom_message":null},"side_tools":{"gear_rotation":true,"auto_expand":false},"open_graph":{"enable":true,"image":"/images/redefine-og.webp","description":"Hexo Theme Redefine, Redefine Your Hexo Journey."},"google_analytics":{"enable":false,"id":null}},"home_banner":{"enable":true,"style":"fixed","image":{"light":"/images/wallhaven-wqery6-light.webp","dark":"/images/wallhaven-wqery6-dark.webp"},"title":"HuAmIの小さな巣","subtitle":{"text":["こんにちは<br>私のブログへようこそ<br>(〃￣︶￣)人(￣︶￣〃)"],"hitokoto":{"enable":false,"show_author":true,"api":"https://v1.hitokoto.cn"},"typing_speed":100,"backing_speed":80,"starting_delay":500,"backing_delay":1500,"loop":true,"smart_backspace":true},"text_color":{"light":"#c0c0c0","dark":"#909090"},"text_style":{"title_size":"2.8rem","subtitle_size":"1.5rem","line_height":1.2},"custom_font":{"enable":false,"family":null,"url":null},"social_links":{"enable":false,"style":"default","links":{"github":null,"instagram":null,"zhihu":null,"twitter":null,"email":null},"qrs":{"weixin":null}}},"plugins":{"feed":{"enable":false},"aplayer":{"enable":false,"type":"fixed","audios":[{"name":null,"artist":null,"url":null,"cover":null,"lrc":null}]},"mermaid":{"enable":false,"version":"11.4.1"}},"version":"2.8.5","navbar":{"auto_hide":false,"color":{"left":"#f78736","right":"#367df7","transparency":35},"width":{"home":"1200px","pages":"1000px"},"links":{"Home":{"path":"/","icon":"fa-regular fa-house"},"Categories":{"icon":"fa-regular fa-folder","path":"/categories","submenus":{"AI":"/categories/AI","Blockchain":"/categories/Blockchain","Forensics":"/categories/Forensics","Reverse":"/categories/Reverse","Preferences":"/categories/Preferences","Basics":"/categories/Basics","Error":"/categories/Error"}},"Archives":{"path":"/archives","icon":"fa-regular fa-archive"},"Links":{"path":"/link","icon":"fa-regular fa-link"}},"search":{"enable":true,"preload":true}},"page_templates":{"friends_column":2,"tags_style":"blur"},"home":{"sidebar":{"enable":true,"position":"left","first_item":"info","announcement":null,"show_on_mobile":true,"links":{"tags":{"path":"/tags","icon":"fa-regular fa-tags"},"links":{"path":"/links","icon":"fa-regular fa-link"},"photos":{"path":"/masonry","icon":"fa-solid fa-image"},"archives":{"path":"/archives","icon":"fa-regular fa-archive"}}},"article_date_format":"auto","excerpt_length":80,"categories":{"enable":true,"limit":10},"tags":{"enable":true,"limit":20}},"footerStart":"2025/10/28 00:00:00"};
+    window.lang_ago = {"second":"%s seconds ago","minute":"%s minutes ago","hour":"%s hours ago","day":"%s days ago","week":"%s weeks ago","month":"%s months ago","year":"%s years ago"};
+    window.data = {"masonry":true};
+  </script>
+    
+    <!--- Fontawesome Part-->
+    
+<link rel="stylesheet" href="/fontawesome/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/brands.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/solid.min.css">
+
+    
+<link rel="stylesheet" href="/fontawesome/regular.min.css">
+
+    
+    
+    
+    
+<meta name="generator" content="Hexo 8.0.0"><link rel="alternate" href="/rss.xml" title="HuAmI" type="application/atom+xml">
+</head>
+
+
+
+<body>
+	<div class="progress-bar-container">
+	
+
+	
+	<span class="pjax-progress-bar"></span>
+	<!--        <span class="swup-progress-icon">-->
+	<!--            <i class="fa-solid fa-circle-notch fa-spin"></i>-->
+	<!--        </span>-->
+	
+</div>
+
+<main class="page-container" id="swup">
+
+	
+
+	<div class="main-content-container flex flex-col justify-between min-h-dvh">
+		<div class="main-content-header">
+			<header class="navbar-container px-6 md:px-12">
+    <div class="navbar-content transition-navbar ">
+        <div class="left">
+            
+            <a class="logo-title" href="/">
+                
+                HuAmI
+                
+            </a>
+        </div>
+
+        <div class="right">
+            <!-- PC -->
+            <div class="desktop">
+                <ul class="navbar-list">
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/"
+                                        >
+                                    <i class="fa-regular fa-house fa-fw"></i>
+                                    HOME
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class="has-dropdown"
+                                   href="#"
+                                        onClick=&#34;return false;&#34;>
+                                    <i class="fa-regular fa-folder fa-fw"></i>
+                                    CATEGORIES
+                                    <i class="fa-solid fa-chevron-down fa-fw"></i>
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                                    <ul class="sub-menu">
+                                        
+                                            <li>
+                                                <a href="/categories/AI">
+                                                    AI
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Blockchain">
+                                                    BLOCKCHAIN
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Forensics">
+                                                    FORENSICS
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Reverse">
+                                                    REVERSE
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Preferences">
+                                                    PREFERENCES
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Basics">
+                                                    BASICS
+                                                </a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="/categories/Error">
+                                                    ERROR
+                                                </a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/archives"
+                                        >
+                                    <i class="fa-regular fa-archive fa-fw"></i>
+                                    ARCHIVES
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                        
+                            
+
+                            <li class="navbar-item">
+                                <!-- Menu -->
+                                <a class=""
+                                   href="/link"
+                                        >
+                                    <i class="fa-regular fa-link fa-fw"></i>
+                                    LINKS
+                                    
+                                </a>
+
+                                <!-- Submenu -->
+                                
+                            </li>
+                    
+                    
+                        <li class="navbar-item search search-popup-trigger">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- Mobile -->
+            <div class="mobile">
+                
+                    <div class="icon-item search search-popup-trigger"><i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                
+                <div class="icon-item navbar-bar">
+                    <div class="navbar-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile sheet -->
+    <div class="navbar-drawer h-dvh w-full absolute top-0 left-0 bg-background-color flex flex-col justify-between">
+        <ul class="drawer-navbar-list flex flex-col px-4 justify-center items-start">
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/"
+                        >
+                            <span>
+                                HOME
+                            </span>
+                            
+                                <i class="fa-regular fa-house fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item-sub text-base my-1.5 flex flex-col w-full">
+                        
+                        <div class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary cursor-pointer text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                             navbar-data-toggle="submenu-Categories"
+                        >
+                            <span>
+                                CATEGORIES
+                            </span>
+                            
+                                <i class="fa-solid fa-chevron-right fa-sm fa-fw transition-all"></i>
+                            
+                        </div>
+                        
+
+                        
+                            <div class="flex-col items-start px-2 py-2 hidden" data-target="submenu-Categories">
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/AI">AI</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Blockchain">BLOCKCHAIN</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Forensics">FORENSICS</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Reverse">REVERSE</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Preferences">PREFERENCES</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Basics">BASICS</a>
+                                    </div>
+                                
+                                    <div class="drawer-navbar-item text-base flex flex-col justify-center items-start hover:underline active:underline hover:underline-offset-1 rounded-3xl">
+                                        <a class=" text-third-text-color text-xl"
+                                           href="/categories/Error">ERROR</a>
+                                    </div>
+                                
+                            </div>
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/archives"
+                        >
+                            <span>
+                                ARCHIVES
+                            </span>
+                            
+                                <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+                
+                    
+
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full "
+                           href="/link"
+                        >
+                            <span>
+                                LINKS
+                            </span>
+                            
+                                <i class="fa-regular fa-link fa-sm fa-fw"></i>
+                            
+                        </a>
+                        
+
+                        
+                    </li>
+            
+
+            
+            
+                
+                    
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/tags"
+                        >
+                            <span>Tags</span>
+                            <i class="fa-regular fa-tags fa-sm fa-fw"></i>
+                        </a>
+                    </li>
+                
+                    
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/links"
+                        >
+                            <span>Links</span>
+                            <i class="fa-regular fa-link fa-sm fa-fw"></i>
+                        </a>
+                    </li>
+                
+                    
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/masonry"
+                        >
+                            <span>photos</span>
+                            <i class="fa-solid fa-image fa-sm fa-fw"></i>
+                        </a>
+                    </li>
+                
+                    
+                    <li class="drawer-navbar-item text-base my-1.5 flex flex-col w-full">
+                        <a class="py-1.5 px-2 flex flex-row items-center justify-between gap-1 hover:!text-primary active:!text-primary text-2xl font-semibold group border-b border-border-color hover:border-primary w-full active"
+                           href="/archives"
+                        >
+                            <span>Archives</span>
+                            <i class="fa-regular fa-archive fa-sm fa-fw"></i>
+                        </a>
+                    </li>
+                
+            
+        </ul>
+
+        <div class="statistics"></div>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+		</div>
+
+		<div class="main-content-body transition-fade-up">
+			
+
+			<div class="main-content">
+				<div class="post-page-container flex relative justify-between box-border w-full h-full">
+	<div class="article-content-container">
+
+		<div class="article-title relative w-full">
+			
+			
+			
+			<img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251126141149861.png" alt="攻防世界HITBGSEC CTF 2017 - arrdeepee (Misc)" class="w-full h-60 sm:h-72 md:h-80 object-cover sm:rounded-t-large dark:brightness-75" />
+			
+			<div class="w-full flex items-center absolute bottom-0 justify-start">
+				<h1 class="article-title-cover text-center mx-6 my-6 text-second-text-color bg-background-color-transparent px-4 py-3 text-3xl sm:text-4xl md:text-5xl font-semibold backdrop-blur-lg rounded-xl border border-border-color ">攻防世界HITBGSEC CTF 2017 - arrdeepee (Misc)</h1>
+			</div>
+			
+		</div>
+
+		
+		<div class="article-header flex flex-row gap-2 items-center px-2 sm:px-6 md:px-8">
+			<div class="avatar w-[46px] h-[46px] flex-shrink-0 rounded-medium border border-border-color p-[1px]">
+				<img src="/images/redefine-avatar.svg">
+			</div>
+			<div class="info flex flex-col justify-between">
+				<div class="author flex items-center">
+					<span class="name text-default-text-color text-lg font-semibold">HuAmI</span>
+					
+					<span class="author-label ml-1.5 text-xs px-2 py-0.5 rounded-small text-third-text-color border border-shadow-color-1">Lv2</span>
+					
+				</div>
+				<div class="meta-info">
+					<div class="article-meta-info">
+    <span class="article-date article-meta-item">
+        <i class="fa-regular fa-pen-fancy"></i>&nbsp;
+        <span class="desktop">2025-11-26 12:12:57</span>
+        <span class="mobile">2025-11-26 12:12:57</span>
+        <span class="hover-info">Created</span>
+    </span>
+    
+        <span class="article-date article-meta-item">
+            <i class="fa-regular fa-wrench"></i>&nbsp;
+            <span class="desktop">2025-11-27 09:33:58</span>
+            <span class="mobile">2025-11-27 09:33:58</span>
+            <span class="hover-info">Updated</span>
+        </span>
+    
+
+    
+        <span class="article-categories article-meta-item">
+            <i class="fa-regular fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/Forensics/">Forensics</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+    
+    
+        <span class="article-tags article-meta-item">
+            <i class="fa-regular fa-tags"></i>&nbsp;
+            <ul>
+                
+                    <li>
+                        <a href="/tags/CTF/">CTF</a>&nbsp;
+                    </li>
+                
+            </ul>
+        </span>
+    
+
+    
+    
+    
+    
+        <span class="article-pv article-meta-item">
+            <i class="fa-regular fa-eye"></i>&nbsp;<span id="busuanzi_value_page_pv"></span>
+        </span>
+    
+</div>
+
+				</div>
+			</div>
+		</div>
+		
+
+		
+
+
+		<div class="article-content markdown-body px-2 sm:px-6 md:px-8 pb-8">
+			<h1 id="Arrdeepee"><a href="#Arrdeepee" class="headerlink" title="Arrdeepee"></a><em><strong>Arrdeepee</strong></em></h1><p><em><from gfsj></from></em></p>
+<p>题目描述:</p>
+<p>我们某一个box被pwn了。在检查过程中，我们发现了一个叫mimikatz的东西，我们以前没有安装过，所以我们清除了，并且重新安装了box。但是，我们忘记备份我们的flag文件了。幸运的是，我们有一个攻击者网络流量捕获。你可以帮我们恢复出flag文件吗？</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126141149861.png" alt="img"></p>
+<p>流量分析,废话不多说,直接开始.</p>
+<p>发现大量tls,同时还有较为罕见的rdp流量,没接触过,试试.</p>
+<p>我们知道rdp流量中 <strong>TPKT 是 RDP 的传输封装层</strong>,同时默认端口：<strong>TCP 3389</strong>, 这种情况下如果没有TPKT流量,就需要wireshark对协议进行解析:</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126145516901.png" alt="img"></p>
+<p>将从59921端口发往3389端口的TCP协议解析为TPKT协议,就可以看到了.</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126140244616.png" alt="img"></p>
+<p>那这时我们看一下比较有嫌疑的RDP流量,发现其被TLS加密了,这时我们的目的就变成了寻找key.</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126151315370.png" alt="img"></p>
+<p>那么key就大概率出现在UDP流量包中了,根据协议分级统计,发现UDP占比还是很高的.</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126151442300.png" alt="img"></p>
+<p>我们追踪一下UDP的流量包.</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126151518276.png" alt="img"></p>
+<p>大致看一下,发现并不是常见文件,但是仔细观察不难发现tss,key等字样,查阅资料:</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">TSSEcKeySet10<br></code></pre></td></tr></table></figure></div>
+
+<p>TSSE &#x3D; Terminal Services Security<br> EcKeySet10 &#x3D; KeySet 标识<br> → <strong>CredSSP &#x2F; RDP 安全握手数据</strong></p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Microsoft Strong Cryptographic Provider<br></code></pre></td></tr></table></figure></div>
+
+<p>这段 hex 属于 <strong>CredSSP &#x2F; NTLM &#x2F; TLS over RDP</strong> 流量中的 <strong>ASN.1 编码结构</strong>，常见于：</p>
+<h6 id="✔-RDP-握手"><a href="#✔-RDP-握手" class="headerlink" title="✔ RDP 握手"></a>✔ RDP 握手</h6><h6 id="✔-NTLMSSP-AUTH"><a href="#✔-NTLMSSP-AUTH" class="headerlink" title="✔ NTLMSSP AUTH"></a>✔ NTLMSSP AUTH</h6><h6 id="✔-公钥传递（Public-Key-Authentication）"><a href="#✔-公钥传递（Public-Key-Authentication）" class="headerlink" title="✔ 公钥传递（Public Key Authentication）"></a>✔ 公钥传递（Public Key Authentication）</h6><h6 id="✔-加密提供程序标识（Crypto-Provider-Name）"><a href="#✔-加密提供程序标识（Crypto-Provider-Name）" class="headerlink" title="✔ 加密提供程序标识（Crypto Provider Name）"></a>✔ 加密提供程序标识（Crypto Provider Name）</h6><p>特别是：</p>
+<ul>
+<li><p><code>Microsoft Strong Cryptographic Provider</code> → Windows 默认加密提供器名称</p>
+</li>
+<li><p><code>TSSEcKeySet10</code> → RDP&#x2F;CredSSP 密钥交换结构</p>
+<p>总的来说, 这无疑就是我们需要寻找的关键key所在文件.</p>
+</li>
+</ul>
+<p>将这段数据完整dump下来.</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126152301513.png" alt="img"></p>
+<p>进一步分析,首先丢进随波逐流里看看.</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126152428856.png" alt="img"></p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126153708468.png" alt="img"></p>
+<p>1: Certificate in DER format (x509 v3), header length: 4, sequence length: 2376<br>2: Certificate in DER format (x509 v3), header length: 4, sequence length: 1466<br>3: Private key in DER format (PKCS header length: 4, sequence length: 860)</p>
+<p>✔ Binwalk 检测到：<br>项	类型	格式	长度说明<br>1	证书	X.509 v3 DER	Sequence 2376 bytes<br>2	证书	X.509 v3 DER	Sequence 1466 bytes<br>3	私钥	Private Key (PKCS#1 &#x2F; PKCS#8) DER	Sequence 860 bytes</p>
+<p>也就是说，文件里包含：</p>
+<p>🟦 两份证书（很可能是：服务器证书中间证书 or 客户端证书）       🟥 一份私钥</p>
+<p>那么显然我们需要将私钥提取,接下来开始提取工作.</p>
+<p>这里我们用openssl进行解密提取,</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126152913220.png" alt="img"></p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">openssl pkcs12 -in data.bin -nocerts -nodes -out private.key<br></code></pre></td></tr></table></figure></div>
+
+<p>OpenSSL 提示：</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Enter Import Password:<br></code></pre></td></tr></table></figure></div>
+
+<p>这里的密码说是题目描述中的mimikatz,输入之后即可拿到私钥文件.  (关于mimikatz会有另一文章介绍).</p>
+<p>私钥文件内容:</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126153803695.png" alt="img"></p>
+<p>很明显是RSA私钥的标准格式.</p>
+<p>我们进行私钥解密加密流量协议.</p>
+<p>我这里直接用命令行对第七层进行解密出的.</p>
+<p><code>tshark -r &quot;rdp.pcap&quot; -d &quot;tcp.port==3389,tls&quot; -o &quot;tls.keys_list:0.0.0.0,0,tpkt,private.key&quot; -o &quot;tpkt.tcp.port:3389&quot; -U &quot;OSI layer 7&quot; -F &quot;pcap&quot; -w &quot;rdp_dec.pcap&quot;</code></p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126154824142.png" alt="img"></p>
+<p>解密成功!这里就可以看到大量RDP流了.</p>
+<p>之后的步骤我也没见过,总的就是重放一下中间人攻击,因为官方用的工具十年前的版本,无人问津了,包括会出现各种兼容性,库等等问题,所以这里求助大佬得知了一个工具——pyrdp</p>
+<p>具体想了解使用教程和原理的可以看看这个老外的一个教程:</p>
+<p><a class="link" target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=cSJ4-gXiNv4&t=29s">PyRDP: Remote Desktop Protocol MITM for Purple Teamers - Black Hat Arsenal 2022<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>
+<p>接下来我们看一下我们的题目,即使是pyrdp这个工具在没有具体的教程的情况还是非常的难用.</p>
+<p>我们进行简单的一个命令对解密的流量包文件进行验证,如果没有解密成功就会报错unknown tls.</p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">pyrdp-convert rdp_dec.pcap -o out <br></code></pre></td></tr></table></figure></div>
+
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126155822236.png" alt="img"></p>
+<div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">pyrdp-convert -f mp4 -o &quot;自定义输出路径&quot; &quot;解密的后的rdp流量包文件路径&quot;<br></code></pre></td></tr></table></figure></div>
+
+<p>这里我当时不太会使用导致直接用pyrdp-convert命令进行对rdp还原为mp4文件,但是仅仅还原视频文件没什么用,需要视频中的输入信息(即剪切板信息).</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126160120503.png" alt="img"></p>
+<p>但是由于pyrdp的限制, pyrdp-player(可以UI图形化) 重放文件时,文件格式必须为pyrdp(如果不转换直接用player进行重放会出现内存报错),但是在转换时老是报错,无奈我这里只能使用mcp(trae)进行了对工具源码进行篡改(似乎也增添了一个扩展),使其可以被自动转换为pyrdp文件进行重放.</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161206779.png" alt="img"></p>
+<p>可以看到转换成功,所以说在功能性的开发上,mcp还是具有很大的优势和解决问题的能力的.</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161515026.png" alt="img"></p>
+<p>这样的话就轻松多了,整个过程最复杂头疼的还是这个工具.</p>
+<p>之后就是一个base64加密了一个加密压缩包的元数据,逆向解密一下就行了,base64编码和压缩包密码都在剪切板的信息里了.</p>
+<p>接下来就一路到底拿到flag.</p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161745356.png" alt="img"></p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161749134.png" alt="img"><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161752629.png" alt="img"></p>
+<p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161805329.png" alt="img"></p>
+<p>○( ＾皿＾)っHiahiahia…</p>
+
+		</div>
+
+		
+		<div class="post-copyright-info w-full my-8 px-2 sm:px-6 md:px-8">
+			<div class="article-copyright-info-container">
+    <ul>
+        <li><strong>Title:</strong> 攻防世界HITBGSEC CTF 2017 - arrdeepee (Misc)</li>
+        <li><strong>Author:</strong> HuAmI</li>
+        <li><strong>Created at
+                :</strong> 2025-11-26 12:12:57</li>
+        
+            <li>
+                <strong>Updated at
+                    :</strong> 2025-11-27 09:33:58
+            </li>
+        
+        <li>
+            <strong>Link:</strong> https://redefine.ohevan.com/2025/11/26/Misc-HITBGSEC CTF 2017-arrdeepee/
+        </li>
+        <li>
+            <strong>
+                License:
+            </strong>
+            
+
+            
+                This work is licensed under <a class="license" target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0">CC BY-NC-SA 4.0</a>.
+            
+        </li>
+    </ul>
+</div>
+
+		</div>
+		
+
+		
+		<ul class="post-tags-box text-lg mt-1.5 flex-wrap justify-center flex md:hidden">
+			
+			<li class="tag-item mx-0.5">
+				<a href="/tags/CTF/">#CTF</a>&nbsp;
+			</li>
+			
+		</ul>
+		
+
+		
+
+		
+		<div class="article-nav my-8 flex justify-between items-center px-2 sm:px-6 md:px-8">
+			
+			<div class="article-prev border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="prev" rel="prev" href="/2025/11/27/DNS%20Courier/">
+					<span class="left arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-left"></i>
+					</span>
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">DNS Courier</span>
+						<span class="post-nav-item">Prev posts</span>
+					</span>
+				</a>
+			</div>
+			
+			
+			<div class="article-next border-border-color shadow-redefine-flat shadow-shadow-color-2 rounded-medium px-4 py-2 hover:shadow-redefine-flat-hover hover:shadow-shadow-color-2">
+				<a class="next" rel="next" href="/2025/11/09/VmwareLinuxmouseScrolling/">
+					<span class="title flex justify-center items-center">
+						<span class="post-nav-title-item truncate max-w-48">VMware Linux Mouse Wheel Tuning and Smooth Scrolling</span>
+						<span class="post-nav-item">Next posts</span>
+					</span>
+					<span class="right arrow-icon flex justify-center items-center">
+						<i class="fa-solid fa-chevron-right"></i>
+					</span>
+				</a>
+			</div>
+			
+		</div>
+		
+
+
+		
+		<div class="comment-container px-2 sm:px-6 md:px-8 pb-8">
+			<div class="comments-container mt-10 w-full ">
+    <div id="comment-anchor" class="w-full h-2.5"></div>
+    <div class="comment-area-title w-full my-1.5 md:my-2.5 text-xl md:text-3xl font-bold">
+        Comments
+    </div>
+    
+
+        
+            
+    <div id="waline"></div>
+    <script type="module" data-swup-reload-script>
+      import { init } from '/js/libs/waline.js';
+
+      function loadWaline() {
+        init({
+          el: '#waline',
+          serverURL: 'https://example.example.com',
+          dark: 'body[class~="dark-mode"]',
+          reaction: false,
+          requiredMeta: ['nick', 'mail'],
+          emoji: [],
+                    lang: 'zh-CN',
+        });
+      }
+
+      if (typeof swup !== 'undefined') {
+        loadWaline();
+      } else {
+        window.addEventListener('DOMContentLoaded', loadWaline);
+      }
+    </script>
+
+
+
+        
+    
+</div>
+
+		</div>
+		
+	</div>
+
+	
+	<div class="toc-content-container">
+		<div class="post-toc-wrap">
+	<div class="post-toc">
+		<div class="toc-title">On this page</div>
+		<div class="page-title">攻防世界HITBGSEC CTF 2017 - arrdeepee (Misc)</div>
+		<ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Arrdeepee"><span class="nav-text">Arrdeepee</span></a></li></ol>
+
+	</div>
+</div>
+	</div>
+	
+</div>
+			</div>
+
+			
+		</div>
+
+		<div class="main-content-footer">
+			<footer class="footer mt-5 py-5 h-auto text-base text-third-text-color relative border-t-2 border-t-border-color">
+    <div class="info-container py-3 text-center">
+        
+        <div class="text-center">
+            &copy;
+            
+              <span>2025</span>
+              -
+            
+            2025&nbsp;&nbsp;<i class="fa-solid fa-heart fa-beat" style="--fa-animation-duration: 0.5s; color: #f54545"></i>&nbsp;&nbsp;<a href="/">HuAmI</a>
+            
+                
+                <p class="post-count space-x-0.5">
+                    <span>
+                        10 posts in total
+                    </span>
+                    
+                </p>
+            
+        </div>
+        
+            <script data-swup-reload-script src="https://cn.vercount.one/js"></script>
+            <div class="relative text-center lg:absolute lg:right-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-right">
+                
+                    <span id="busuanzi_container_site_uv" class="lg:!block">
+                        <span class="text-sm">VISITOR COUNT</span>
+                        <span id="busuanzi_value_site_uv"></span>
+                    </span>
+                
+                
+                    <span id="busuanzi_container_site_pv" class="lg:!block">
+                        <span class="text-sm">TOTAL PAGE VIEWS</span>
+                        <span id="busuanzi_value_site_pv"></span>
+                    </span>
+                
+            </div>
+        
+        <div class="relative text-center lg:absolute lg:left-[20px] lg:top-1/2 lg:-translate-y-1/2 lg:text-left">
+            <span class="lg:block text-sm">POWERED BY <?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg class="relative top-[2px] inline-block align-baseline" version="1.1" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="1rem" height="1rem" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><path fill="#0E83CD" d="M256.4,25.8l-200,115.5L56,371.5l199.6,114.7l200-115.5l0.4-230.2L256.4,25.8z M349,354.6l-18.4,10.7l-18.6-11V275H200v79.6l-18.4,10.7l-18.6-11v-197l18.5-10.6l18.5,10.8V237h112v-79.6l18.5-10.6l18.5,10.8V354.6z"/></svg><a target="_blank" class="text-base" href="https://github.com/HuA-m1/HuA-m1.github.io">HuAmI</a></span>
+            <span class="text-sm lg:block">THEME&nbsp;<a class="text-base" target="_blank" href="https://github.com/EvanNotFound/hexo-theme-redefine">Redefine v2.8.5</a></span>
+        </div>
+        
+        
+        
+        
+        
+    </div>  
+</footer>
+		</div>
+	</div>
+
+	
+	<div class="post-tools">
+		<div class="post-tools-container">
+	<ul class="article-tools-list">
+		<!-- TOC aside toggle -->
+		
+		<li class="right-bottom-tools page-aside-toggle">
+			<i class="fa-regular fa-outdent"></i>
+		</li>
+		
+
+		<!-- go comment -->
+		
+		<li class="go-comment">
+			<i class="fa-regular fa-comments"></i>
+		</li>
+		
+	</ul>
+</div>
+	</div>
+	
+
+	<div class="right-side-tools-container">
+		<div class="side-tools-container">
+	<ul class="hidden-tools-list">
+		<li class="right-bottom-tools tool-font-adjust-plus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-plus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-font-adjust-minus flex justify-center items-center">
+			<i class="fa-regular fa-magnifying-glass-minus"></i>
+		</li>
+
+		<li class="right-bottom-tools tool-dark-light-toggle flex justify-center items-center">
+			<i class="fa-regular fa-moon"></i>
+		</li>
+
+		<!-- rss -->
+		
+
+		
+
+		<li class="right-bottom-tools tool-scroll-to-bottom flex justify-center items-center">
+			<i class="fa-regular fa-arrow-down"></i>
+		</li>
+	</ul>
+
+	<ul class="visible-tools-list">
+		<li class="right-bottom-tools toggle-tools-list flex justify-center items-center">
+			<i class="fa-regular fa-cog fa-spin"></i>
+		</li>
+		
+		<li class="right-bottom-tools tool-scroll-to-top flex justify-center items-center">
+			<i class="arrow-up fas fa-arrow-up"></i>
+			<span class="percent"></span>
+		</li>
+		
+		
+	</ul>
+</div>
+	</div>
+
+	<div class="image-viewer-container">
+	<img src="">
+</div>
+
+	
+	<div class="search-pop-overlay">
+	<div class="popup search-popup">
+		<div class="search-header">
+			<span class="search-input-field-pre">
+				<i class="fa-solid fa-keyboard"></i>
+			</span>
+			<div class="search-input-container">
+				<input autocomplete="off" autocorrect="off" autocapitalize="off" placeholder="Search..." spellcheck="false" type="search" class="search-input">
+			</div>
+			<span class="popup-btn-close">
+				<i class="fa-solid fa-times"></i>
+			</span>
+		</div>
+		<div id="search-result">
+			<div id="no-result">
+				<i class="fa-solid fa-spinner fa-spin-pulse fa-5x fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
+	
+
+</main>
+
+
+
+<script src="/js/build/libs/Swup.min.js"></script>
+
+<script src="/js/build/libs/SwupSlideTheme.min.js"></script>
+
+<script src="/js/build/libs/SwupScriptsPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupProgressPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupScrollPlugin.min.js"></script>
+
+<script src="/js/build/libs/SwupPreloadPlugin.min.js"></script>
+
+<script>
+    const swup = new Swup({
+        plugins: [
+            new SwupScriptsPlugin({
+                optin: true,
+            }),
+            new SwupProgressPlugin(),
+            new SwupScrollPlugin({
+                offset: 80,
+            }),
+            new SwupSlideTheme({
+                mainElement: ".main-content-body",
+            }),
+            new SwupPreloadPlugin(),
+        ],
+        containers: ["#swup"],
+    });
+</script>
+
+
+
+
+	
+<script src="/js/build/tools/imageViewer.js" type="module"></script>
+
+<script src="/js/build/utils.js" type="module"></script>
+
+<script src="/js/build/main.js" type="module"></script>
+
+<script src="/js/build/layouts/navbarShrink.js" type="module"></script>
+
+<script src="/js/build/tools/scrollTopBottom.js" type="module"></script>
+
+<script src="/js/build/tools/lightDarkSwitch.js" type="module"></script>
+
+<script src="/js/build/layouts/categoryList.js" type="module"></script>
+
+
+
+    
+<script src="/js/build/tools/localSearch.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/tools/codeBlock.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/layouts/lazyload.js" type="module"></script>
+
+
+
+
+
+
+  
+<script src="/js/build/libs/Typed.min.js"></script>
+
+  
+<script src="/js/build/plugins/typed.js" type="module"></script>
+
+
+
+
+
+
+    
+<script src="/js/build/libs/minimasonry.min.js"></script>
+
+    
+<script src="/js/build/plugins/masonry.js" type="module"></script>
+
+
+
+
+    
+<script src="/js/build/libs/anime.min.js"></script>
+
+
+
+
+
+    
+<script src="/js/build/tools/tocToggle.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/layouts/toc.js" type="module" data-swup-reload-script=""></script>
+
+<script src="/js/build/plugins/tabs.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+<script src="/js/build/libs/moment-with-locales.min.js" data-swup-reload-script=""></script>
+
+
+<script src="/js/build/layouts/essays.js" type="module" data-swup-reload-script=""></script>
+
+
+
+
+
+	
+</body>
+
+</html>
