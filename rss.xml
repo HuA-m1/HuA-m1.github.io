@@ -6,7 +6,7 @@
   <link href="http://example.com/rss.xml" rel="self"/>
   
   <link href="http://example.com/"/>
-  <updated>2025-12-15T15:43:42.620Z</updated>
+  <updated>2026-01-03T09:26:17.890Z</updated>
   <id>http://example.com/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>DNS Spoof</title>
+    <link href="http://example.com/2026/01/03/DNS_Spoof/"/>
+    <id>http://example.com/2026/01/03/DNS_Spoof/</id>
+    <published>2026-01-03T10:12:57.000Z</published>
+    <updated>2026-01-03T09:26:17.890Z</updated>
+    
+    <content type="html"><![CDATA[<h1 id="DNS-Spoof"><a href="#DNS-Spoof" class="headerlink" title="DNS Spoof"></a><em><strong>DNS Spoof</strong></em></h1><p><em>摸上了<strong>Ettercap</strong>这款工具一直想做一下DNS劫持的,于是乎就开启了一个DNS劫持复现的过程~~~</em></p><p>(本演示仅用于教学,不可用于任何非法用途,违反法律造成的任何后果自行承担)</p><p>**Ettercap: **    Ettercap 是一个用于局域网流量分析与中间人攻击（MITM）实验的安全工具。</p><table><thead><tr><th>分类</th><th>内容</th><th>说明</th></tr></thead><tbody><tr><td>工具类型</td><td>局域网安全测试工具</td><td>主要用于 <strong>MITM（中间人）攻击实验与防御验证</strong></td></tr><tr><td>工作层级</td><td><strong>二层为核心</strong></td><td>依赖 <strong>ARP</strong>，而不是 ping &#x2F; ICMP</td></tr><tr><td>使用前提</td><td>同一局域网</td><td>不同子网、跨路由基本无效</td></tr><tr><td>典型环境</td><td>内网 &#x2F; 实验网</td><td>Kali、教学、授权测试</td></tr></tbody></table><table><thead><tr><th>功能</th><th>作用</th><th>结果</th></tr></thead><tbody><tr><td>主机发现</td><td>扫描局域网在线设备</td><td>Host List 里出现多个 IP</td></tr><tr><td>ARP 欺骗</td><td>构造中间人</td><td>选 Target1 &#x2F; Target2</td></tr><tr><td>流量嗅探</td><td>捕获通信数据</td><td>能看到 HTTP &#x2F; DNS</td></tr><tr><td>流量篡改</td><td>修改经过的数据</td><td>演示完整性破坏</td></tr><tr><td>插件系统</td><td>扩展攻击 &#x2F; 检测</td><td>dns_spoof、arp_cop</td></tr></tbody></table><p>接下来我就用集成了Ettercap工具的kali (linux虚拟机)来做演示:</p><p><em>演示前提条件 :</em></p><table><thead><tr><th>前提条件</th><th>是否必须</th><th>原因说明</th></tr></thead><tbody><tr><td>同一局域网</td><td>必须</td><td>DNS 劫持基于二层&#x2F;三层，跨路由无效</td></tr><tr><td>能成为中间人（MITM）</td><td>必须</td><td>必须“看到并拦截”DNS 请求</td></tr><tr><td>ARP 可被欺骗</td><td>必须</td><td>常见实现方式（Ettercap 依赖）</td></tr><tr><td>目标使用 <strong>非加密 DNS</strong></td><td>必须</td><td>DoH &#x2F; DoT 会直接失效</td></tr><tr><td>目标 DNS 请求能到达你</td><td>必须</td><td>不管是发给网关还是本地 DNS</td></tr><tr><td>合法授权环境</td><td>必须</td><td>实验&#x2F;教学前提</td></tr></tbody></table><p>首先我们进入kali虚拟机的环境中:</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103163234269.png" alt="img"></p><p>输入对应名称就可发现相关使用的命令和功能 ; (一般多用ettercap -G图形化窗口)</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103163656456.png" alt="img"></p><p>在开始实验前,我需要做一下准备,首先需要一台受害者虚拟机(我这里是win10),保证kali与win10虚拟机可以互ping(win10防火墙全部关闭)</p><p>然后查询当前win10的IP&#x2F;ipconfig</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103164101034.png" alt="img"></p><p>我这里用的是桥接模式(即网关是真实存在的网关:192.168.10.1)</p><p>同时需要保证二者在同一网关下.然后我们在kali上搭建自己的平台.</p><p>启动apache的服务</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">service apache2 start<br></code></pre></td></tr></table></figure></div><p>同时进入linux的系统文件夹中,寻找配置文件(即想让受害者看到的页面),默认位置在</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">/etc/ettercap/etter.dns<br></code></pre></td></tr></table></figure></div><p>同时对dns文件进行配置,这里添加如图两行的文本(可以理解为将所有DNS解析到对应的服务地址)</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103164739369.png" alt="img"></p><p>这里我们将DNS解析的位置定位到我们自己的IP上(即kali的IP地址),保存并退出.</p><p>然后我自己简单做了一个index.html的页面来展示DNS劫持成功的结果(用trae),我们自己做了以后,放在下面的路径中.</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">/var/www/html/<br></code></pre></td></tr></table></figure></div><p>然后我们可以自己测试一下,能否访问.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103170253025.png" alt="img"></p><p>然后我们启动ettercap图形化的工具.默认选中eth0网卡,同时关闭sniffing at startup(网络嗅探).</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103165015669.png" alt="img"></p><p>然后点击在右上角的 <strong>√</strong>  完成后.点击左上角的 🔍(搜索样式的图标),对该网段下的所有hosts进行扫描,再点击🔍右侧的图标</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103165339767.png" alt="img"></p><p>我们就能看到该网段下正在使用的IP.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103165619161.png" alt="img"></p><p>第一个为网段也就是路由器的地址,第二个是我另一台物理机的地址,第三个是其他物理机地址,第四个就是win10(受害)虚拟机的IP地址.</p><p>我们可以用手机连接wifi重复刚才操作来观察这个表单是否改变.</p><p>其次我们选中我们当前的网关作为<em><strong>target1</strong></em>(192.168.10.1),选中我们要劫持的主机(win10: 192.168.10.19)加入到<em><strong>target2</strong></em>(可以选择多个)</p><p>接着我们点击MITM中间人攻击的表单,选择ARP欺骗</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103170406978.png" alt="img"></p><p>默认<strong>OK</strong>,然后点击右边的<strong>三个点</strong>,找到<strong>plugins</strong>选项,选择 <strong>manage plugins</strong>, 选择<strong>DNS_Spoof</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103171409919.png" alt="img"></p><p>配置成功后点击左上的三角,开启劫持.此时在win10虚拟机上访问任何网站都会解析成我们之前设置的指定的页面.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260103172104685.png" alt="img"></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;h1 id=&quot;DNS-Spoof&quot;&gt;&lt;a href=&quot;#DNS-Spoof&quot; class=&quot;headerlink&quot; title=&quot;DNS Spoof&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;DNS Spoof&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;摸上了&lt;strong&gt;E</summary>
+      
+    
+    
+    
+    <category term="Web" scheme="http://example.com/categories/Web/"/>
+    
+    
+    <category term="渗透" scheme="http://example.com/tags/%E6%B8%97%E9%80%8F/"/>
+    
+  </entry>
   
   <entry>
     <title>Mode加密模式</title>
@@ -26,12 +50,10 @@
     <content type="html"><![CDATA[<h1 id="Mode-加密模式"><a href="#Mode-加密模式" class="headerlink" title="Mode 加密模式"></a><em><strong>Mode 加密模式</strong></em></h1><h6 id="1）是什么？"><a href="#1）是什么？" class="headerlink" title="1）是什么？"></a>1）是什么？</h6><p>1:加密模式是定义怎样通过重复利用加密算法将大于一个数据块大小的明文转化为密文。</p><p>2:分组密码算法只能加密固定长度的分组，待加密的明文长度一般会大于分组长度，这里就需要对分组密码算法进行多次迭代，从而实现对明文的全部加密，迭代的方式就称为分组密码的加密模式。</p><p>3:诸如Tea简单加密算法而言，在分组密码加密过程中，往往要对原明文或明文的hash摘要进行分组操作，然而加密模式所决定的其实就是分组密码加密过程中对原明文的分组过程前后进行的处理操作，这一系列的处理都是为了结合各种加密的特点来更为方便的处理，保证加密的安全。<br>可以简单理解为分组模式，只不过根据不同的加密模式有不同的处理方式。</p><h6 id="2）为了什么？"><a href="#2）为了什么？" class="headerlink" title="2）为了什么？"></a>2）为了什么？</h6><p>总结为增强加密过程的安全性、灵活性和效率。</p><h6 id="3）如何工作？mode加密模式的不同对解密有什么影响？"><a href="#3）如何工作？mode加密模式的不同对解密有什么影响？" class="headerlink" title="3）如何工作？mode加密模式的不同对解密有什么影响？"></a>3）如何工作？mode加密模式的不同对解密有什么影响？</h6><p>这两点我们放在一起讨论学习：</p><p>首先，我们知道，加密模式多种多样，是为了适合多种的加密模式。<br>我们常见的加密模式有：</p><p>• ECB：Electronic Code Book（电子码本模式）<br>• CBC：Cipher Block Chaining（密码块链模式）<br>• CTR：Counter（计数器模式）<br>此外，还有其他的一些模式，本文中将不做介绍。<br>• CFB：Cipher Feedback（密码反馈模式）<br>• OFB：Output Feedback（输出反馈模式）等等。</p><p>下面我们对每个加密模式进行分析：</p><ol><li><em><strong>ECB</strong></em>（电子密码本）</li></ol><p>工作原理：<br><a class="link" href="https://pica.zhimg.com/v2-aeb4e5a8596abdc79d564f3437f8a1f0_1440w.jpg">https://pica.zhimg.com/v2-aeb4e5a8596abdc79d564f3437f8a1f0_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>特点：</p><p>每个块独立加密，无关联性<br>相同明文块生成相同密文块<br>密文块按原顺序拼接<br><strong>代码示例</strong>（Python）：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span>Crypto.Cipher import AES</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs from">from Crypto.Random import get_random_bytes<br>from Crypto.Util.Padding import pad  <br><br>key_128 = get_random_bytes(16)  # AES-128，生成16字节的密钥<br><br>data = pad(b’SensitiveData‘, AES.block_size)  <br>cipher = AES.new(key_128, AES.MODE_ECB)  <br>ciphertext = cipher.encrypt(data)  # 危险！禁止用于真实场景<br></code></pre></td></tr></table></figure></div><p>安全警示：</p><p>加密图像可见轮廓<br>无法防御重放攻击</p><ol start="2"><li><em><strong>CBC</strong></em>（密码块链）</li></ol><p>工作原理：<br><a class="link" href="https://pica.zhimg.com/v2-b731cde78da630e4c89dacf00a49050e_1440w.jpg">https://pica.zhimg.com/v2-b731cde78da630e4c89dacf00a49050e_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>核心要素：</p><p>初始化向量（IV）必须随机且唯一<br>前一个密文块参与下一块加密<br>安全配置：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span>Crypto.Cipher import AES</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs from">import os  <br><br>key = os.urandom(16)  <br>iv = os.urandom(16)  # 必须每次随机生成  <br>cipher = AES.new(key, AES.MODE_CBC, iv)  <br></code></pre></td></tr></table></figure></div><p>典型攻击：填充提示攻击（Padding Oracle Attack），如2014年针对SSL 3.0的POODLE攻击。</p><ol start="3"><li><em><strong>CTR</strong></em>（计数器模式）</li></ol><p>工作原理：<br><a class="link" href="https://pic1.zhimg.com/v2-481a22ee36fb51ab2f1fe25f3cf1fe6c_1440w.jpg">https://pic1.zhimg.com/v2-481a22ee36fb51ab2f1fe25f3cf1fe6c_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>优势：</p><p>支持并行加密&#x2F;解密<br>无需填充（适合任意长度数据）<br>代码实践：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span>Crypto.Cipher import AES</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs from">import os  <br><br>key = os.urandom(16)  <br>nonce = os.urandom(8)  # 64位随机数  <br>cipher = AES.new(key, AES.MODE_CTR, nonce=nonce)  <br>ciphertext = cipher.encrypt(b”Real-time Video Stream“)<br></code></pre></td></tr></table></figure></div><ol start="4"><li><em><strong>GCM</strong></em>（伽罗瓦&#x2F;计数器模式）</li></ol><p>工作原理：<br><a class="link" href="https://pic2.zhimg.com/v2-9bbcd7679a91b69b71a6b8d3edfea30d_1440w.jpg">https://pic2.zhimg.com/v2-9bbcd7679a91b69b71a6b8d3edfea30d_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>核心价值：</p><p>同时提供机密性、完整性、认证（组合了CTR加密与GMAC认证算法）<br>硬件加速支持（AES-NI指令集），硬件加速效率比软件实现快10倍以上<br>实战代码：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span>Crypto.Cipher import AES</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs from">import os  <br><br>key = os.urandom(16)  <br>nonce = os.urandom(12)  <br>cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)  <br>cipher.update(b”AdditionalData“)  # 认证附加数据  <br>ciphertext, tag = cipher.encrypt_and_digest(b”TopSecret“)<br></code></pre></td></tr></table></figure></div><ol start="5"><li><em><strong>CCM</strong></em>（计数器与CBC-MAC模式）</li></ol><p>工作原理：<br><a class="link" href="https://pica.zhimg.com/v2-1b7937f59d02d9220f96ab90a4496dde_1440w.jpg">https://pica.zhimg.com/v2-1b7937f59d02d9220f96ab90a4496dde_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>CCM加密模式工作原理图（RFC 3610标准兼容版）<br>标签Tag：由CBC-MAC生成的认证码。</p><p>适用场景：</p><p>资源受限设备（如物联网传感器）<br>需要轻量级认证加密的场景<br>6. <em><strong>OFB</strong></em>（输出反馈模式）</p><p>工作原理：<br><a class="link" href="https://pic2.zhimg.com/v2-3ea67f3a91db15d09ed8f5e757499c97_1440w.jpg">https://pic2.zhimg.com/v2-3ea67f3a91db15d09ed8f5e757499c97_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>由于是将密码算法的输出反馈给密码算法，因此称为输出反馈模式。</p><p>特点：</p><p>密钥流预生成，抗比特翻转<br>错误不会传播！<br>典型应用：卫星通信</p><ol start="7"><li><em><strong>CFB</strong></em>（密码反馈模式）</li></ol><p>工作原理：<br><a class="link" href="https://pic2.zhimg.com/v2-2d145b909dd15abe1f2a4d657e78bb5b_1440w.jpg">https://pic2.zhimg.com/v2-2d145b909dd15abe1f2a4d657e78bb5b_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>第一个块将IV加密生成密钥流，然后与明文块进行异或运算得到密文块。接下来的块会将前一个密文块作为输入来生成下一个密钥流，依次类推。</p><p>因此，每个密文块不仅依赖于当前明文，还依赖于前一个密文块，这提供了自同步的能力，即使某个块在传输中出错，错误只会影响有限的后续块。</p><p>核心特点：</p><p>自同步：若某个密文块传输错误，错误只会影响后续有限块（取决于移位寄存器大小）。<br>流加密：支持按需逐位&#x2F;逐字节加密，无需等待完整数据块。<br>安全注意事项：</p><p>IV 必须唯一且随机，否则可能导致密钥流重复。<br>避免短移位寄存器（如 CFB-8），可能降低安全性。<br>认证缺失：需配合 HMAC 等机制保证完整性。<br>三、选型指南</p><p>选型指南</p><p><a class="link" href="https://pica.zhimg.com/v2-bbb0ed0c169d367c62d457575f64a380_1440w.jpg">https://pica.zhimg.com/v2-bbb0ed0c169d367c62d457575f64a380_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>模式对比</p><p><a class="link" href="https://pic4.zhimg.com/v2-4b599408ea2c0ec898e3db3d7179368d_1440w.jpg">https://pic4.zhimg.com/v2-4b599408ea2c0ec898e3db3d7179368d_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a><br>记忆口诀：</p><p>ECB独立最危险，CBC链式IV关键；</p><p>CTR流转性能先，GCM认证最安全；</p><p>OFB预载抗错链，CFB自同步有限传；</p><p>CCM轻量物联选，按需配置避风险。</p><p>四、实战：OpenSSL性能测试</p><ol><li>速度测试命令</li></ol><h3 id="测试AES-128-GCM性能"><a href="#测试AES-128-GCM性能" class="headerlink" title="测试AES-128-GCM性能"></a>测试AES-128-GCM性能</h3><p>openssl speed -evp aes-128-gcm  </p><h3 id="对比所有模式"><a href="#对比所有模式" class="headerlink" title="对比所有模式"></a>对比所有模式</h3><p>for mode in ecb cbc ctr ofb cfb gcm ccm; do<br>    openssl speed -evp aes-128-$mode<br>done<br>2. 典型结果（i7-12700H）</p><p>模式速度（MB&#x2F;s）<br>ECB498<br>CBC432<br>CTR460<br>GCM415<br>CCM385<br>五、安全加固检查清单</p><ol><li>通用原则</li></ol><p>禁用ECB：openssl ciphers -v ‘!ECDHE-RSA-AES256-SHA:!AES256-ECB’<br>强制前向保密：优先选择ECDHE密钥交换<br>定期轮换密钥：尤其是长期使用的对称密钥<br>2. 各模式专用配置</p><p>CBC：启用PKCS#7填充校验<br>GCM：确保nonce全局唯一（推荐计数器）<br>CTR：使用64位随机nonce+64位计数器<br>六、总结：加密模式的进化之路</p><p>从ECB到GCM，加密模式的演进史就是一部对抗黑客攻击的历史：</p><p>第一代：ECB&#x2F;CBC（基础防护）<br>第二代：CTR&#x2F;OFB&#x2F;CFB（性能优化）<br>第三代：GCM&#x2F;CCM（认证加密）<br>未来趋势：</p><p>抗量子加密：CRYSTALS-Kyber等算法整合<br>内存安全实现：Rust语言重构OpenSSL<br>通过本文，相信你已掌握七种加密模式的本质差异与实战要点。记住：没有绝对安全的算法，只有正确场景下的合理选择。</p><p>立即行动：</p><p>使用nmap –script ssl-enum-ciphers扫描你的服务器，欢迎评论区分享扫描出的安全评级结果，获取定制化加固建议！</p><p>Nmap扫描结果中密码套件强度分级（本例为A，采用了GCM模式）</p><p><a class="link" href="https://pic4.zhimg.com/v2-0a8a8546083ae1317481ba5631051705_1440w.jpg">https://pic4.zhimg.com/v2-0a8a8546083ae1317481ba5631051705_1440w.jpg<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>上述部分来源Source：<a class="link" href="https://zhuanlan.zhihu.com/p/1906102542502466994">https://zhuanlan.zhihu.com/p/1906102542502466994<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;Mode-加密模式&quot;&gt;&lt;a href=&quot;#Mode-加密模式&quot; class=&quot;headerlink&quot; title=&quot;Mode 加密模式&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Mode 加密模式&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;h6 id=&quot;1）是什么？&quot;&gt;&lt;a href=&quot;#1）是什么？&quot; class=&quot;headerlink&quot; title=&quot;1）是什么？&quot;&gt;&lt;/a&gt;1）是什么？&lt;/h6&gt;&lt;p&gt;1:加密模式是定义怎样通过重复利用加密算法将大于一个数据块大小的明文转化为密文。&lt;/p&gt;
-&lt;p&gt;2:分组密码算法只能加密固定长度的分组，待加密的明文长度一般会大于分组长度，这里就需要对分组密码算法进行多次迭代，从而实现对明文的全部加密，迭代的方式就称为分组密码的加密模式。&lt;/p&gt;
-&lt;p&gt;3:诸如Tea简单加密算法而言，在分组密码加密过程中，往往要对原明文或明文的hash摘要进行分组操作，然而加密模式所决定的其实就是分组密码加密过程中对原明文的分组过程前后进行的处理操作，这一系列的处理都是为了结合各种加密的特点来更为方便的处理，保证加密的安全。&lt;br&gt;可以简单理解为分组模式，只不过根据不同的加密模式有不同的处理方式。&lt;/p&gt;
-&lt;h6 id=&quot;2）为了什么？&quot;&gt;&lt;a href=&quot;#2）为了什么？&quot; class=&quot;headerlink&quot; title=&quot;2）为了什么？&quot;&gt;&lt;/a&gt;2）为了什么？&lt;/h6&gt;&lt;p&gt;总结为增强加密过程的安全性、灵活性和效率。&lt;/p&gt;
-&lt;h6 id=&quot;3）如何工作？mode加密模式的不同对解密有什么影响？&quot;&gt;&lt;a href=&quot;#3）如何工作？mode加密模式的不同对解密有什么影响？&quot; class=&quot;headerlink&quot; title=&quot;3）如何工作？mode加密模式的不同对解密有什么影响？&quot;&gt;&lt;/a&gt;3）如何工作？mode加密模式的不同对解密有什么影响？&lt;/h6&gt;&lt;p&gt;这两点我们放在一起讨论学习：&lt;/p&gt;
-&lt;p&gt;首先，我们知道，加密模式多种多样，是为了适合多种的加密模式。&lt;br&gt;我们常见的加密模式有：&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Mode-加密模式&quot;&gt;&lt;a href=&quot;#Mode-加密模式&quot; class=&quot;headerlink&quot; title=&quot;Mode 加密模式&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Mode 加密模式&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;h6 id=&quot;1）是什么？&quot;&gt;&lt;a </summary>
+      
     
     
     
@@ -52,13 +74,10 @@
     <content type="html"><![CDATA[<h1 id="IV（Initialization-Vector）——初始化向量"><a href="#IV（Initialization-Vector）——初始化向量" class="headerlink" title="IV（Initialization Vector）——初始化向量"></a><em><strong>IV（Initialization Vector）——初始化向量</strong></em></h1><p>本文简单阐述IV初始化向量的意义。</p><h6 id="什么是IV？"><a href="#什么是IV？" class="headerlink" title="什么是IV？"></a>什么是IV？</h6><p>顾名思义，初始化：一开始就需要被使用的。</p><p>定义：<br>IV是在密码学中为增强安全性而引入的一个随机或伪随机数据块，通常与分组密码的某些工作模式（如 CBC、CFB、OFB、CTR 等）配合使用。#具体应用可以看看mode加密模式那一篇。</p><h6 id="干什么的？"><a href="#干什么的？" class="headerlink" title="干什么的？"></a>干什么的？</h6><p>作用（存在意义）：</p><p>IV 是在加密算法开始时使用的 初始输入值，其主要作用是保证即使相同的密钥和相同的明文重复出现，最终产生的密文也不会一样，从而防止攻击者通过分析重复模式推测信息。</p><p><em>Personal opinion</em>：我们在mode加密模式那章见过IV，以及可能在CTF比赛中对于AES解密过程中可能需要我们发现IV并填充以正确解密。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145705449.png" alt="img"></p><p><a class="link" href="https://pica.zhimg.com/80/v2-01a89d098bf3daf5a1e41cdea573708a_1440w.webp?source=1def8aca">https://pica.zhimg.com/80/v2-01a89d098bf3daf5a1e41cdea573708a_1440w.webp?source=1def8aca<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>总的来说，IV可以在分组密码mode模式下，与明文块1或加密后的密文块1进行异或等操作后再进行之后一系列的分组加密操作，以保证随机性和唯一性。（可以类比加盐这一操作的意义）</p><p>（关于加盐和IV的区别会在另一文章中阐述，以便更好的理解各自的实际意义和作用，工作原理）</p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;IV（Initialization-Vector）——初始化向量&quot;&gt;&lt;a href=&quot;#IV（Initialization-Vector）——初始化向量&quot; class=&quot;headerlink&quot; title=&quot;IV（Initialization Vector）——初始化向量&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;IV（Initialization Vector）——初始化向量&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;本文简单阐述IV初始化向量的意义。&lt;/p&gt;
-&lt;h6 id=&quot;什么是IV？&quot;&gt;&lt;a href=&quot;#什么是IV？&quot; class=&quot;headerlink&quot; title=&quot;什么是IV？&quot;&gt;&lt;/a&gt;什么是IV？&lt;/h6&gt;&lt;p&gt;顾名思义，初始化：一开始就需要被使用的。&lt;/p&gt;
-&lt;p&gt;定义：&lt;br&gt;IV是在密码学中为增强安全性而引入的一个随机或伪随机数据块，通常与分组密码的某些工作模式（如 CBC、CFB、OFB、CTR 等）配合使用。#具体应用可以看看mode加密模式那一篇。&lt;/p&gt;
-&lt;h6 id=&quot;干什么的？&quot;&gt;&lt;a href=&quot;#干什么的？&quot; class=&quot;headerlink&quot; title=&quot;干什么的？&quot;&gt;&lt;/a&gt;干什么的？&lt;/h6&gt;&lt;p&gt;作用（存在意义）：&lt;/p&gt;
-&lt;p&gt;IV 是在加密算法开始时使用的 初始输入值，其主要作用是保证即使相同的密钥和相同的明文重复出现，最终产生的密文也不会一样，从而防止攻击者通过分析重复模式推测信息。&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Personal opinion&lt;/em&gt;：我们在mode加密模式那章见过IV，以及可能在CTF比赛中对于AES解密过程中可能需要我们发现IV并填充以正确解密。&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145705449.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;IV（Initialization-Vector）——初始化向量&quot;&gt;&lt;a href=&quot;#IV（Initialization-Vector）——初始化向量&quot; class=&quot;headerlink&quot; title=&quot;IV（Initialization Vector）——初</summary>
+      
     
     
     
@@ -79,15 +98,11 @@
     <content type="html"><![CDATA[<h1 id="ECDSA"><a href="#ECDSA" class="headerlink" title="ECDSA"></a><em><strong>ECDSA</strong></em></h1><p>@2025年11月6日</p><p>ECDSA主要包含两个过程部分：<br>1:签名<br>2:验签</p><p>1）ECDSA的签名过程包括以下步骤：</p><p>选择一条椭圆曲线Ep（a，b）和基点G；<br>选择私有密钥k（k&lt;n，n为G的阶），利用基点G计算公开密钥K&#x3D;kG；<br>产生一个随机整数r（r&lt;n），计算点R&#x3D;rG；<br>将原数据和点R的坐标值x，y作为参数，计算SHA1做为hash，即Hash&#x3D;SHA1（原数据，x，y）；<br>计算s≡r−Hash∗k(modn)；<br>r和s做为签名值，如果r和s其中一个为0，重新从第3步开始执行。<br>验证过程如下：</p><p>2）接受方在收到消息m和签名值r，s后，进行以下运算；<br>计算sG+H(m)P&#x3D;(x1，y1)，r1≡x1modp；<br>验证等式：r1≡rmodp；<br>如果等式成立，接受签名，否则签名无效。</p><p><em><strong>大致过程如上所述，那么如何实现的呢？</strong></em></p><p>学习前，可能会有这样的疑问：椭圆曲线如何选择，公私钥如何生成，一般对什么样的消息进行签名，最终签名如何生成。。。。。。</p><p>首先，选定椭圆方程。一般情况下选择： y^{2}&#x3D;x^{3}+ax+b   形式的方程。</p><p>确定G点基点（G点是椭圆曲线上预先选定的一个点，是整个 ECDSA 算法运算的起始点）</p><p>曲线的阶（(n)）是指椭圆曲线上所有点（包括无穷远点）的数量。</p><p>私钥<u><em><strong>private key</strong></em></u>选取：D随机数（1&lt;&#x3D;D&lt;&#x3D;n-1）。</p><p>公钥<u><em><strong>public key</strong></em></u>生成根据私钥Q：Q&#x3D;D*G</p><p>待加密数据消息：M———M被hash(m),m的hash值作为后续处理的明文。</p><p>产生一个随机整数r（r&lt;n）。</p><p>同样  R&#x3D; r*G， R用于后续另一个hash数的生成，hash数后续再用于s的产生。（注：<em><strong>签名的产生始终以（r,s)的形式产生，其目的始终是为了通过复杂的变化和计算来完成签名的安全性，无需深究逻辑</strong></em>）</p><p>再之，将原始数据和点R的坐标值x，y作为参数，计算SHA1做为hash，即Hash&#x3D;SHA1（原数据，x，y）；</p><p><em><strong>那么为何如果r和s其中一个为0，重新从第3步开始执行呢？</strong></em></p><p>一般情况下，从安全角度看，r 或 s 为 0 可能会泄露私钥的信息或者使签名容易受到攻击。正常的签名过程是通过私钥和随机数生成的，而 r 或 s 为 0 可能暗示随机数的选取出现了问题，或者私钥的使用存在漏洞，这会严重威胁安全。</p><p>以下是AI给出的回答，这里以图片形式供作参考：</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145004766.jpg" alt="img"></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145048853.jpg" alt="img"></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145121657.jpg" alt="img"></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145152783.jpg" alt="img"></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145221053.jpg" alt="img"></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145236612.jpg" alt="img"></p><p>WanBi!<br>接下来，通过一个python代码，来展示ECDSA的实际应用过程：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span>ecdsa import SigningKey, SECP256k1</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs from">import hashlib<br><br># 1. 生成私钥和公钥<br>sk = SigningKey.generate(curve=SECP256k1)<br>vk = sk.verifying_key<br><br>message = b”Hello, ECDSA!“<br>e = hashlib.sha256(message).digest()<br><br># 2. 生成签名<br>signature = sk.sign(e)<br><br># 3. 验证签名<br>is_valid = vk.verify(signature, e)<br>print(”验证结果：“, is_valid)<br></code></pre></td></tr></table></figure></div>]]></content>
     
     
+      
+      
     <summary type="html">&lt;h1 id=&quot;ECDSA&quot;&gt;&lt;a href=&quot;#ECDSA&quot; class=&quot;headerlink&quot; title=&quot;ECDSA&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;ECDSA&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;@2025年11月6日&lt;/p&gt;
-&lt;p&gt;ECDSA主要包含两个过程部分：&lt;br&gt;1:签名&lt;br&gt;2:验签&lt;/p&gt;
-&lt;p&gt;1）ECDSA的签名过程包括以下步骤：&lt;/p&gt;
-&lt;p&gt;选择一条椭圆曲线Ep（a，b）和基点G；&lt;br&gt;选择私有密钥k（k&amp;lt;n，n为G的阶），利用基点G计算公开密钥K&amp;#x3D;kG；&lt;br&gt;产生一个随机整数r（r&amp;lt;n），计算点R&amp;#x3D;rG；&lt;br&gt;将原数据和点R的坐标值x，y作为参数，计算SHA1做为hash，即Hash&amp;#x3D;SHA1（原数据，x，y）；&lt;br&gt;计算s≡r−Hash∗k(modn)；&lt;br&gt;r和s做为签名值，如果r和s其中一个为0，重新从第3步开始执行。&lt;br&gt;验证过程如下：&lt;/p&gt;
-&lt;p&gt;2）接受方在收到消息m和签名值r，s后，进行以下运算；&lt;br&gt;计算sG+H(m)P&amp;#x3D;(x1，y1)，r1≡x1modp；&lt;br&gt;验证等式：r1≡rmodp；&lt;br&gt;如果等式成立，接受签名，否则签名无效。&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;&lt;strong&gt;大致过程如上所述，那么如何实现的呢？&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;学习前，可能会有这样的疑问：椭圆曲线如何选择，公私钥如何生成，一般对什么样的消息进行签名，最终签名如何生成。。。。。。&lt;/p&gt;
-&lt;p&gt;首先，选定椭圆方程。一般情况下选择： y^{2}&amp;#x3D;x^{3}+ax+b   形式的方程。&lt;/p&gt;
-&lt;p&gt;确定G点基点（G点是椭圆曲线上预先选定的一个点，是整个 ECDSA 算法运算的起始点）&lt;/p&gt;</summary>
+&lt;p&gt;ECDSA主要包含两个过程</summary>
+      
     
     
     
@@ -108,15 +123,10 @@
     <content type="html"><![CDATA[<h1 id="RC4"><a href="#RC4" class="headerlink" title="RC4"></a><em><strong>RC4</strong></em></h1><p>什么是RC4 ?<br>RC4加密算法是大名鼎鼎的RSA三人组中的头号人物Ron Rivest在1987年设计的密钥长度可变的流加密算法簇，之所以称其为簇，是由于其核心部分的S-box长度可为任意，但一般为256字节。</p><p>在密码学中，RC4（来自Rivest Cipher 4的缩写）是一种流加密算法，密钥长度可变。它加解密使用相同的密钥，因此也属于对称加密算法。所谓对称加密，就是加密和解密的过程是一样的。RC4是有线等效加密（WEP）中采用的加密算法，也曾经是TLS可采用的算法之一。</p><p>RC4已经成为一些常用的协议和标准的一部分，如1997年的WEP和2003&#x2F;2004年无线卡的WPA; 和1995年的SSL，以及后来1999年的TLS。让它如此广泛分布和使用的主要因素是它不可思议的简单和速度，不管是软件还是硬件，实现起来都十分容易。</p><p>基本原理<br>对明文使用同一个密钥异或两次最后得到的是原文</p><p>加密：原文和Keystream进行异或得到密文<br>解密：密文和Keystream进行异或得到原文</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145513358.png" alt="img"></p><p>生成秘钥流（KeyStream）<br>从上图可以看出来，RC4加密原理很简单，只需要一个KeyStream与明文进行异或即可，密钥流的长度和明文的长度是对应的。RC4算法的的主要代码还是在于如何生成秘钥流。</p><p>密钥流的生成由两部分组成：</p><p>KSA（the Key-Scheduling Algorithm)<br>PRGA(the Pseudo-Random Generation Algorithm)<br>利用Key生成S盒——The key-scheduling algorithm (KSA)</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span>得到S-box */</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs /*">int i = 0;<br>for (i = 0; i &lt; 256; i++) &#123;<br>    S[i] = i;<br>    T[i] = puc_key[i % key_length];<br>&#125;<br> <br>for (i = 0; i &lt; 256; i++) &#123;<br>    j = (j + S[i] + T[i]) % 256;<br>    swap_uchar(&amp;S[i], &amp;S[j]); //交换S[i]和S[j]<br>&#125;<br></code></pre></td></tr></table></figure></div><p>利用S盒生成密钥流——The pseudo-random generation algorithm(PRGA)<br><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145512436.png" alt="img"></p><p>图片来源：<a class="link" href="https://www.biaodianfu.com/rc4.html">https://www.biaodianfu.com/rc4.html<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>&#x2F;* 生成密钥流 Keystream *&#x2F;</p><pre><code class="language-int">int j = 0;int t = 0;unsigned long k = 0; for (k = 0; k &lt; ul_data_length; k++) {    i = (i + 1) % 256;    j = (j + puc_sbox[i]) % 256;    swap_uchar(&amp;puc_sbox[i], &amp;puc_sbox[j]);    t = (puc_sbox[i] + puc_sbox[j]) % 256;    puc_key_stream[k] = puc_sbox[t];}代码实现#include&lt;stdio.h&gt;#include&lt;string.h&gt; #define SBOX_LEN 256 #define rc4_encrypt rc4_crypt#define rc4_decrypt rc4_crypt static inline void swap_uchar(unsigned char *puc_x, unsigned char *puc_y){    *puc_x = *puc_x ^ *puc_y;    *puc_y = *puc_x ^ *puc_y;    *puc_x = *puc_x ^ *puc_y;} void hexdump(unsigned char *puc_data, int length){    int i = 0;     for (i = 0; i &lt; length; i++) {        printf(&quot;%02X&quot;, puc_data[i]);        if (i &amp;&amp; (i + 1) % 16 == 0) {            putchar(&#39;\n&#39;);        }    }    printf(&quot;\n&quot;);} /** * 利用Key生成S盒 * the Key-Scheduling Algorithm */static void rc4_ksa(unsigned char *puc_sbox, unsigned char *puc_key, int key_length){    int i = 0;    int j = 0;    char tmp[SBOX_LEN] = {0};     for (i = 0; i &lt; SBOX_LEN; i++) {        puc_sbox[i] = i;        tmp[i] = puc_key[i % key_length];    }     for (i = 0; i &lt; SBOX_LEN; i++) {        j = (j + puc_sbox[i] + tmp[i]) % SBOX_LEN;        swap_uchar(&amp;puc_sbox[i], &amp;puc_sbox[j]); //交换puc_sbox[i]和puc_sbox[j]    }} /** * 利用S盒生成密钥流 * The pseudo-random generation algorithm(PRGA) */static void rc4_prga(unsigned char *puc_sbox, unsigned char *puc_key_stream, unsigned long ul_data_length){    int i = 0;    int j = 0;    int t = 0;    unsigned long k = 0;     for (k = 0; k &lt; ul_data_length; k++) {        i = (i + 1) % SBOX_LEN;        j = (j + puc_sbox[i]) % SBOX_LEN;        swap_uchar(&amp;puc_sbox[i], &amp;puc_sbox[j]);        t = (puc_sbox[i] + puc_sbox[j]) % SBOX_LEN;        /* 为了更清晰理解rc4算法流程，此处保存keystream，不直接进行XOR运算 */        puc_key_stream[k] = puc_sbox[t];    }} /* 加解密 */void rc4_crypt(unsigned char *puc_data, unsigned char *puc_key_stream, unsigned long ul_data_length){    unsigned long i = 0;     /* 把PRGA算法放在加解密函数中可以不需要保存keystream */    for (i = 0; i &lt; ul_data_length; i++) {        puc_data[i] ^= puc_key_stream[i];    }} int main(int argc, char *argv[]){    unsigned char sbox[SBOX_LEN] = {0};    char key[SBOX_LEN] = {&quot;abcdefghijklmnopqrstuvwxyz&quot;}; //秘钥内容随便定义    char data[512] = &quot;lsRJ@.0 lvfvr#9527&quot;;    unsigned char puc_keystream[512] = {0};    unsigned long ul_data_length = strlen(data);     printf(&quot;key=%s, length=%d\n\n&quot;, key, strlen(key));    printf(&quot;Raw data string:%s\n&quot;, data);    printf(&quot;Raw data hex:\n&quot;);    hexdump(data, ul_data_length);     /* 生成S-box */    rc4_ksa(sbox, (unsigned char *)key, strlen(key));     /* 生成keystream并保存,S-box也会被更改 */    rc4_prga(sbox, puc_keystream, ul_data_length);     printf(&quot;S-box final status:\n&quot;);    hexdump(sbox, sizeof(sbox));     printf(&quot;key stream:\n&quot;);    hexdump(puc_keystream, ul_data_length);     /* 加密 */    rc4_encrypt((unsigned char*)data, puc_keystream, ul_data_length);     printf(&quot;cipher hexdump:\n&quot;);    hexdump(data, ul_data_length);     /* 解密 */    rc4_decrypt((unsigned char*)data, puc_keystream, ul_data_length);     printf(&quot;decypt data:%s\n&quot;, data);     return 0;}</code></pre>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;RC4&quot;&gt;&lt;a href=&quot;#RC4&quot; class=&quot;headerlink&quot; title=&quot;RC4&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;RC4&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;什么是RC4 ?&lt;br&gt;RC4加密算法是大名鼎鼎的RSA三人组中的头号人物Ron Rivest在1987年设计的密钥长度可变的流加密算法簇，之所以称其为簇，是由于其核心部分的S-box长度可为任意，但一般为256字节。&lt;/p&gt;
-&lt;p&gt;在密码学中，RC4（来自Rivest Cipher 4的缩写）是一种流加密算法，密钥长度可变。它加解密使用相同的密钥，因此也属于对称加密算法。所谓对称加密，就是加密和解密的过程是一样的。RC4是有线等效加密（WEP）中采用的加密算法，也曾经是TLS可采用的算法之一。&lt;/p&gt;
-&lt;p&gt;RC4已经成为一些常用的协议和标准的一部分，如1997年的WEP和2003&amp;#x2F;2004年无线卡的WPA; 和1995年的SSL，以及后来1999年的TLS。让它如此广泛分布和使用的主要因素是它不可思议的简单和速度，不管是软件还是硬件，实现起来都十分容易。&lt;/p&gt;
-&lt;p&gt;基本原理&lt;br&gt;对明文使用同一个密钥异或两次最后得到的是原文&lt;/p&gt;
-&lt;p&gt;加密：原文和Keystream进行异或得到密文&lt;br&gt;解密：密文和Keystream进行异或得到原文&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251216145513358.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;生成秘钥流（KeyStream）&lt;br&gt;从上图可以看出来，RC4加密原理很简单，只需要一个KeyStream与明文进行异或即可，密钥流的长度和明文的长度是对应的。RC4算法的的主要代码还是在于如何生成秘钥流。&lt;/p&gt;
-&lt;p&gt;密钥流的生成由两部分组成：&lt;/p&gt;
-&lt;p&gt;KSA（the Key-Scheduling Algorithm)&lt;br&gt;PRGA(the Pseudo-Random Generation Algorithm)&lt;br&gt;利用Key生成S盒——The key-scheduling algorithm (KSA)&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;RC4&quot;&gt;&lt;a href=&quot;#RC4&quot; class=&quot;headerlink&quot; title=&quot;RC4&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;RC4&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;什么是RC4 ?&lt;br&gt;RC4加密算法是大名鼎鼎的RSA三人组中的头号人物Ron</summary>
+      
     
     
     
@@ -137,13 +147,10 @@
     <content type="html"><![CDATA[<h1 id="Padding填充模式"><a href="#Padding填充模式" class="headerlink" title="Padding填充模式"></a><em><strong>Padding填充模式</strong></em></h1><p>Padding（填充）是指在执行分组加密时，为了让明文长度刚好符合“分组大小的整数倍”，在明文末尾增加一些额外字节的过程。</p><p>我们在初次接触密码算法的过程中，使用一些专业的密码破解工具时往往能看到某些加密的过程中会有像PCKS#7等等的模式选项，经过查询我们可以得知这是一种密码在加密过程中对明文不满足特定长度倍数的一种特殊处理方法，以便更为快速方便的加密更为多样的明文消息。</p><h4 id="举例："><a href="#举例：" class="headerlink" title="举例："></a>举例：</h4><p>TEA、DES 的 block size &#x3D; 8 字节<br>AES 的 block size &#x3D; 16 字节<br>如果明文长度不是 8 或 16 的整数倍，就必须“填满”这一块，才能加密。</p><h3 id="为什么需要-Padding（填充）？"><a href="#为什么需要-Padding（填充）？" class="headerlink" title="为什么需要 Padding（填充）？"></a>为什么需要 Padding（填充）？</h3><p>分组加密算法（Block Cipher）有一个不可改变的特点：<br>它只能处理固定长度的分组（block）<br>例如 TEA 一次只能处理 64 bit（8 字节）。<br>如果明文是：<br>HELLO (5 字节)</p><p>TEA 不能直接加密，因为 5 ≠ 8。<br>必须变成 8 字节，例如：<br>48 45 4C 4C 4F 03 03 03   ← PKCS#7 填充</p><p>于是 TEA 才能加密一个完整的 block。</p><p>因此我们在解密的过程中需要对padding填充模式进行选择以此来正确进行解密过程。</p><h4 id="那么padding模式有哪些？这些具有哪些的特点？不同的分组密码一般选择什么padding模式呢？"><a href="#那么padding模式有哪些？这些具有哪些的特点？不同的分组密码一般选择什么padding模式呢？" class="headerlink" title="那么padding模式有哪些？这些具有哪些的特点？不同的分组密码一般选择什么padding模式呢？"></a>那么padding模式有哪些？这些具有哪些的特点？不同的分组密码一般选择什么padding模式呢？</h4><h3 id="填充模式"><a href="#填充模式" class="headerlink" title="填充模式"></a><strong>填充模式</strong></h3><h5 id="NoPadding"><a href="#NoPadding" class="headerlink" title="NoPadding"></a>NoPadding</h5><p>不填充，在此填充下原始数据必须是分组大小的整数倍，非整数倍时无法使用该模式，会报错。</p><h6 id="PKCS5Padding-PKCS7Padding"><a href="#PKCS5Padding-PKCS7Padding" class="headerlink" title="PKCS5Padding &#x2F; PKCS7Padding"></a>PKCS5Padding &#x2F; PKCS7Padding</h6><p>填充至符合块大小的整数倍，填充值为填充数量数，需要填充7个字节，就全部填07。</p><p>原始：FF FF FF FF FF FF FF FF FF<br>填充：FF FF FF FF FF FF FF FF FF 07 07 07 07 07 07 07</p><p>PKCS5Padding 的块大小应为 8 个字节，而 PKCS7Padding 的块大小可以在 1~255 的范围内。但 SunJCE 的 Provider 实现中 PKCS5Padding 也按 PKCS7Padding 来进行处理了。<br>有个细节，如果明文刚好是块的整数倍，也要加填充。</p><h6 id="ISO10126Padding"><a href="#ISO10126Padding" class="headerlink" title="ISO10126Padding"></a>ISO10126Padding</h6><p>填充至符合块大小的整数倍，填充值最后一个字节为填充的数量数，其他字节随机处理。</p><p>原始：FF FF FF FF FF FF FF FF FF<br>填充：FF FF FF FF FF FF FF FF FF 3F 7A B4 09 14 36 07</p><h6 id="ISO7816-4Padding"><a href="#ISO7816-4Padding" class="headerlink" title="ISO7816-4Padding"></a>ISO7816-4Padding</h6><p>填充至符合块大小的整数倍，填充值第一个字节为 0x80，其他字节填 0。</p><p>原始：FF FF FF FF FF FF FF FF FF<br>填充：FF FF FF FF FF FF FF FF FF 80 00 00 00 00 00 00</p><h6 id="ZeroBytePadding"><a href="#ZeroBytePadding" class="headerlink" title="ZeroBytePadding"></a>ZeroBytePadding</h6><p>填充至符合块大小的整数倍，填充值为 0</p><p>原始：FF FF FF FF FF FF FF FF FF<br>填充：FF FF FF FF FF FF FF FF FF 00 00 00 00 00 00 00</p><h6 id="X923Padding"><a href="#X923Padding" class="headerlink" title="X923Padding"></a>X923Padding</h6><p>填充至符合块大小的整数倍，填充值最后一个字节为填充的数量数，其他字节填 0。</p><p>原始：FF FF FF FF FF FF FF FF FF<br>填充：FF FF FF FF FF FF FF FF FF 00 00 00 00 00 00 07</p><h6 id="TBCPadding（Trailing-Bit-Compliment）"><a href="#TBCPadding（Trailing-Bit-Compliment）" class="headerlink" title="TBCPadding（Trailing-Bit-Compliment）"></a>TBCPadding（Trailing-Bit-Compliment）</h6><p>填充至符合块大小的整数倍，原文最后一位为“1”时填充 0x00，最后一位为“0”时填充“0xFF”。</p><p>原始：FF FF FF FF FF FF FF FF FF<br>填充：FF FF FF FF FF FF FF FF FF 00 00 00 00 00 00 00<br>原始：FF FF FF FF FF FF FF FF F0<br>填充：FF FF FF FF FF FF FF FF F0 FF FF FF FF FF FF FF</p><h6 id="PKCS1Padding"><a href="#PKCS1Padding" class="headerlink" title="PKCS1Padding"></a>PKCS1Padding</h6><p>该填充模式是 RSA 加密中使用的，详见 RFC 2313。RSA 加密时，需要将原文填充至密钥大小，填充的格式为：<br>00 + BT + PS + 00 + D</p><p>00 为固定字节<br>BT 为处理模式。公钥操作时为 02，私钥操作为 00 或 01<br>PS 为填充字节，填充数量为 k - 3 - D，k 表示密钥长度，D 表示原文长度。PS 的最小长度为 8 个字节。填充的值根据 BT 值不同而不同：</p><p>BT &#x3D; 00 时，填充全 00<br>BT &#x3D; 01 时，填充全 FF<br>BT &#x3D; 02 时，随机填充，但不能为 00</p><p><em><strong>Source</strong></em><a class="link" href="https://juejin.cn/post/7410347333646417946">：https://juejin.cn/post/7410347333646417946<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;Padding填充模式&quot;&gt;&lt;a href=&quot;#Padding填充模式&quot; class=&quot;headerlink&quot; title=&quot;Padding填充模式&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Padding填充模式&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;Padding（填充）是指在执行分组加密时，为了让明文长度刚好符合“分组大小的整数倍”，在明文末尾增加一些额外字节的过程。&lt;/p&gt;
-&lt;p&gt;我们在初次接触密码算法的过程中，使用一些专业的密码破解工具时往往能看到某些加密的过程中会有像PCKS#7等等的模式选项，经过查询我们可以得知这是一种密码在加密过程中对明文不满足特定长度倍数的一种特殊处理方法，以便更为快速方便的加密更为多样的明文消息。&lt;/p&gt;
-&lt;h4 id=&quot;举例：&quot;&gt;&lt;a href=&quot;#举例：&quot; class=&quot;headerlink&quot; title=&quot;举例：&quot;&gt;&lt;/a&gt;举例：&lt;/h4&gt;&lt;p&gt;TEA、DES 的 block size &amp;#x3D; 8 字节&lt;br&gt;AES 的 block size &amp;#x3D; 16 字节&lt;br&gt;如果明文长度不是 8 或 16 的整数倍，就必须“填满”这一块，才能加密。&lt;/p&gt;
-&lt;h3 id=&quot;为什么需要-Padding（填充）？&quot;&gt;&lt;a href=&quot;#为什么需要-Padding（填充）？&quot; class=&quot;headerlink&quot; title=&quot;为什么需要 Padding（填充）？&quot;&gt;&lt;/a&gt;为什么需要 Padding（填充）？&lt;/h3&gt;&lt;p&gt;分组加密算法（Block Cipher）有一个不可改变的特点：&lt;br&gt;它只能处理固定长度的分组（block）&lt;br&gt;例如 TEA 一次只能处理 64 bit（8 字节）。&lt;br&gt;如果明文是：&lt;br&gt;HELLO (5 字节)&lt;/p&gt;
-&lt;p&gt;TEA 不能直接加密，因为 5 ≠ 8。&lt;br&gt;必须变成 8 字节，例如：&lt;br&gt;48 45 4C 4C 4F 03 03 03   ← PKCS#7 填充&lt;/p&gt;
-&lt;p&gt;于是 TEA 才能加密一个完整的 block。&lt;/p&gt;
-&lt;p&gt;因此我们在解密的过程中需要对padding填充模式进行选择以此来正确进行解密过程。&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Padding填充模式&quot;&gt;&lt;a href=&quot;#Padding填充模式&quot; class=&quot;headerlink&quot; title=&quot;Padding填充模式&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Padding填充模式&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;Padding（</summary>
+      
     
     
     
@@ -164,30 +171,11 @@
     <content type="html"><![CDATA[<h1 id="xxtea"><a href="#xxtea" class="headerlink" title="xxtea"></a><em><strong>xxtea</strong></em></h1><p>那么xxtea又来了！</p><p>相比于xtea，乃至tea，这次的改进可谓是大改进，在安全性和加密流程上做了较为巨大的改动，整体安全性也得到了提升：<br>1、处理任意长度数据<br>2、增强扩散性和抗差分攻击能力<br>3、key调度更合理</p><p>观察tea和xtea，不难发现其实改动并不大，而且分组明文块的大小始终固定为八字节难免会存在安全性问题。 包括xtea和tea只在一个块中的两个半块进行扩散等等。</p><p>XXTEA &#x3D; XTEA 的多块版本 + 非线性轮函数改进 + 轮数随数组长度调整 + 修复 Block TEA 弱点<br>xxtea采用相邻半块进行更新，而tea，xtea只在一个块中的两个半块更新：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">v[i] = v[i] + F( v[i-1], v[(i+1)%n], sum, K[i&amp;3] )<br></code></pre></td></tr></table></figure></div><h2 id="下面从5个方面来看看区别："><a href="#下面从5个方面来看看区别：" class="headerlink" title="下面从5个方面来看看区别："></a><em><strong>下面从5个方面来看看区别：</strong></em></h2><h4 id="存在意义"><a href="#存在意义" class="headerlink" title="存在意义"></a><em><strong>存在意义</strong></em></h4><table><thead><tr><th>算法</th><th>目标</th></tr></thead><tbody><tr><td>XTEA</td><td>修复 TEA 的弱点（等价密钥问题、周期性问题），适用于固定 64-bit 分组加密</td></tr><tr><td>XXTEA</td><td>扩展 XTEA，支持任意长度数据块，修复原 Block TEA 的弱点，提高多块消息的安全性</td></tr></tbody></table><h4 id="数据块结构"><a href="#数据块结构" class="headerlink" title="数据块结构"></a><em><strong>数据块结构</strong></em></h4><table><thead><tr><th>特性</th><th>XTEA</th><th>XXTEA</th></tr></thead><tbody><tr><td>分组大小</td><td>64-bit（v0, v1 两个 32-bit 半块）</td><td>任意长度数组 ≥2 个 32-bit 单元</td></tr><tr><td>数据处理</td><td>只处理两个半块</td><td>循环处理整个数组，每块受邻居影响</td></tr></tbody></table><h4 id="轮函数与数据扩散"><a href="#轮函数与数据扩散" class="headerlink" title="轮函数与数据扩散"></a><em><strong>轮函数与数据扩散</strong></em></h4><table><thead><tr><th>特性</th><th>XTEA</th><th>XXTEA</th></tr></thead><tbody><tr><td>每轮更新</td><td>v0 或 v1 交替</td><td>每块 v[i] 更新，受左右邻居影响</td></tr><tr><td>数据扩散</td><td>限于两个半块之间</td><td>整个数组，扩散性强</td></tr><tr><td>轮数</td><td>固定 64</td><td>随数组长度 n 调整（6 + 52&#x2F;n）</td></tr><tr><td>非线性组合</td><td>移位 + 加法 + XOR</td><td>移位 + XOR + 加法 + 邻居影响</td></tr></tbody></table><h4 id="key调度"><a href="#key调度" class="headerlink" title="key调度"></a><em><strong>key调度</strong></em></h4><table><thead><tr><th>特性</th><th>XTEA</th><th>XXTEA</th></tr></thead><tbody><tr><td>key_index 来源</td><td>sum 的 bit：(sum&amp;3, (sum&gt;&gt;11)&amp;3)</td><td>块索引 i &amp; 3</td></tr><tr><td>key 使用规律</td><td>随轮数 sum 决定，跳跃式但依赖 sum</td><td>直接依赖块索引，循环全数组，更简单且安全</td></tr><tr><td>key 与数据块关联</td><td>仅两个半块</td><td>所有块都用 key 参与更新</td></tr></tbody></table><h4 id="安全性对比"><a href="#安全性对比" class="headerlink" title="安全性对比"></a><em><strong>安全性对比</strong></em></h4><table><thead><tr><th>特性</th><th>XTEA</th><th>XXTEA</th></tr></thead><tbody><tr><td>弱点修复</td><td>修复 TEA 的等价密钥问题和周期性弱点</td><td>修复 Block TEA 多块弱点，增强扩散和抗差分攻击能力</td></tr><tr><td>抗差分攻击</td><td>有限扩散，攻击难度比 TEA 高</td><td>扩散性强，攻击难度更大</td></tr><tr><td>适用场景</td><td>小分组、嵌入式</td><td>任意长度消息，多块数据加密</td></tr></tbody></table><h3 id="总结："><a href="#总结：" class="headerlink" title="总结："></a><em><strong>总结：</strong></em></h3><ol><li><strong>XTEA</strong> &#x3D; TEA 改进版，固定 64-bit 分组，key 由 sum 决定，轮数固定。</li><li><strong>XXTEA</strong> &#x3D; XTEA 的多块扩展版，可加密任意长度数组，轮函数覆盖全数组，每块受邻居影响，key 由块索引决定，扩散性更强。</li></ol>]]></content>
     
     
+      
+      
     <summary type="html">&lt;h1 id=&quot;xxtea&quot;&gt;&lt;a href=&quot;#xxtea&quot; class=&quot;headerlink&quot; title=&quot;xxtea&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;xxtea&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;那么xxtea又来了！&lt;/p&gt;
-&lt;p&gt;相比于xtea，乃至tea，这次的改进可谓是大改进，在安全性和加密流程上做了较为巨大的改动，整体安全性也得到了提升：&lt;br&gt;1、处理任意长度数据&lt;br&gt;2、增强扩散性和抗差分攻击能力&lt;br&gt;3、key调度更合理&lt;/p&gt;
-&lt;p&gt;观察tea和xtea，不难发现其实改动并不大，而且分组明文块的大小始终固定为八字节难免会存在安全性问题。 包括xtea和tea只在一个块中的两个半块进行扩散等等。&lt;/p&gt;
-&lt;p&gt;XXTEA &amp;#x3D; XTEA 的多块版本 + 非线性轮函数改进 + 轮数随数组长度调整 + 修复 Block TEA 弱点&lt;br&gt;xxtea采用相邻半块进行更新，而tea，xtea只在一个块中的两个半块更新：&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;v[i] = v[i] + F( v[i-1], v[(i+1)%n], sum, K[i&amp;amp;3] )&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-
-
-&lt;h2 id=&quot;下面从5个方面来看看区别：&quot;&gt;&lt;a href=&quot;#下面从5个方面来看看区别：&quot; class=&quot;headerlink&quot; title=&quot;下面从5个方面来看看区别：&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;下面从5个方面来看看区别：&lt;/strong&gt;&lt;/em&gt;&lt;/h2&gt;&lt;h4 id=&quot;存在意义&quot;&gt;&lt;a href=&quot;#存在意义&quot; class=&quot;headerlink&quot; title=&quot;存在意义&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;存在意义&lt;/strong&gt;&lt;/em&gt;&lt;/h4&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;算法&lt;/th&gt;
-&lt;th&gt;目标&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td&gt;XTEA&lt;/td&gt;
-&lt;td&gt;修复 TEA 的弱点（等价密钥问题、周期性问题），适用于固定 64-bit 分组加密&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;XXTEA&lt;/td&gt;
-&lt;td&gt;扩展 XTEA，支持任意长度数据块，修复原 Block TEA 的弱点，提高多块消息的安全性&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;h4 id=&quot;数据块结构&quot;&gt;&lt;a href=&quot;#数据块结构&quot; class=&quot;headerlink&quot; title=&quot;数据块结构&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;数据块结构&lt;/strong&gt;&lt;/em&gt;&lt;/h4&gt;</summary>
+&lt;p&gt;相比于xtea，乃至tea</summary>
+      
     
     
     
@@ -208,36 +196,10 @@
     <content type="html"><![CDATA[<h1 id="Tea"><a href="#Tea" class="headerlink" title="Tea"></a><em><strong>Tea</strong></em></h1><p>（<em>Tiny Encryption Algorithm</em>）｜分组加密算法</p><p>Basic Elements：</p><table><thead><tr><th>参数</th><th>说明</th></tr></thead><tbody><tr><td>明文</td><td>64 比特（分为两个 32 位部分）</td></tr><tr><td>密钥</td><td>128 比特（分为 4 个 32 位部分）</td></tr><tr><td>轮数</td><td>64 次（32 轮循环，每轮包含两个半轮操作）</td></tr><tr><td>常量</td><td><code>delta = 0x9E3779B9</code> （即黄金分割常数的整数近似）</td></tr></tbody></table><p>首先，我们逐一对各个<em><strong>element</strong></em>进行分析解释：</p><h6 id="明文："><a href="#明文：" class="headerlink" title="明文："></a>明文：</h6><p>明文长度不一定是64bit<br>明文不是 64 位（不是 8 字节）怎么办？——<em><strong>必须填充（padding）到 8 字节的倍数</strong></em>。<br>填充完之后再做处理。</p><h6 id="分组："><a href="#分组：" class="headerlink" title="分组："></a>分组：</h6><p>明文填充（padding）到 8 字节的倍数需要分组。<br>example：<br>“helloctfgaoshou”，此字符串按照utf-8编码，标准的ASCII字符串的长度是15，很显然需要填充一个字符来达到8字节整数倍达到16字节。</p><p>此处按PKCS7Padding模式，按块所缺个数填充值。<br>例如：填充至符合块大小的整数倍，填充值为填充数量数，需要填充7个字节，就全部填07。</p><p>原始：FF FF FF FF FF FF FF FF FF<br>填充：FF FF FF FF FF FF FF FF FF 07 07 07 07 07 07 07</p><p>填充完之后进行分组，按每<strong>8</strong>字节为一个<strong>块（block）</strong>。</p><p>Block 0: 前 8 字节<br>Block 1: 后 8 字节</p><p>接着每个块（即每8个字节）：</p><p>每 8 字节被分成：<br>v0 &#x3D; 前 4 字节（32bit） &#x2F;&#x2F; 1字节&#x3D;&#x3D;8位（bit）<br>v1 &#x3D; 后 4 字节（32bit）</p><p>这样分组工作就做好了！</p><p>再之我们就需要进行加密工作了，但在这之前我们需要选取一个合适的key。</p><h6 id="选取key："><a href="#选取key：" class="headerlink" title="选取key："></a>选取key：</h6><p>key的选取不是随机的，当然也是随机的。</p><p>为什么这么说呢，前者是说key的选取要有一定的要求：</p><p>1、必须是 16 字节（128 位） &#x2F;&#x2F;！注意：key一般不推荐进行填充！<br>2、任意字节值都可以（00–FF）<br>3、可以是字符串、随机数、固定常量都行<br>（但字符串本身也必须恰好 16 字节）</p><p>后者对key就要有随机性，不能有特殊含义和规律。</p><h6 id="加密："><a href="#加密：" class="headerlink" title="加密："></a>加密：</h6><p>加密按每4字节进行（前面已经分好组了）。<br>同时key也要进行<strong>分组</strong>，在<strong>分组</strong>那边就不多赘述了，直接在这里讲。</p><p>将 key 拆成 4 个 32-bit 整数。<br>明文8字节一组，每组独立加密。<br>每组执行 32 轮运算：（以下是示例代码）</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs DELTA">sum = 0<br><br>for i = 1 to 32:<br>    sum += DELTA<br>    v0 += ((v1 &lt;&lt; 4) + k0) ^ (v1 + sum) ^ ((v1 &gt;&gt; 5) + k1) //kn为分组后key<br>    v1 += ((v0 &lt;&lt; 4) + k2) ^ (v0 + sum) ^ ((v0 &gt;&gt; 5) + k3) //vn为分组后明文<br></code></pre></td></tr></table></figure></div><p>当然如果太明白这段代码，可以看一下文字赘述，或者AI辅助理解：</p><h6 id="v0-v1-4-k0-v1-sum-v1-5-k1"><a href="#v0-v1-4-k0-v1-sum-v1-5-k1" class="headerlink" title="v0 +&#x3D; ((v1 &lt;&lt; 4) + k0) ^ (v1 + sum) ^ ((v1 &gt;&gt; 5) + k1)"></a>v0 +&#x3D; ((v1 &lt;&lt; 4) + k0) ^ (v1 + sum) ^ ((v1 &gt;&gt; 5) + k1)</h6><p>逐项拆解：<br>(v1 &lt;&lt; 4) + k0<br>v1 左移 4 位 → 放大高位信息<br>加上子密钥 k0 → 加入密钥扰动<br>左移 4 位相当于乘 16，加大 v1 对 v0 的影响<br>(v1 + sum)<br>用 v1 + 累加的 sum 做混合<br>sum 每轮不同，保证每轮输入不同<br>(v1 &gt;&gt; 5) + k1<br>v1 右移 5 位 → 保留低位信息<br>加上子密钥 k1 → 密钥扰动<br>左移和右移结合，增强高低位混合<br>三者用异或 ^ 连接<br>XOR 可以把各部分位信息混合<br>保证混合后 v0 每轮高度变化<br>最后 v0 +&#x3D; …<br>将混合结果加到 v0<br>所有操作都是 32-bit 无符号整数，溢出会自动循环</p><h6 id="v1-v0-4-k2-v0-sum-v0-5-k3"><a href="#v1-v0-4-k2-v0-sum-v0-5-k3" class="headerlink" title="v1 +&#x3D; ((v0 &lt;&lt; 4) + k2) ^ (v0 + sum) ^ ((v0 &gt;&gt; 5) + k3)"></a>v1 +&#x3D; ((v0 &lt;&lt; 4) + k2) ^ (v0 + sum) ^ ((v0 &gt;&gt; 5) + k3)</h6><p>和 v0 的更新几乎一样，只是用新的 v0 和 k2&#x2F;k3<br>保证左右交互（Feistel结构）：<br>v0 影响 v1<br>v1 影响下一轮 v0</p><p>最后学习了这些，给给大家一个完整的加解密流程，来深入感受Tea。</p><h6 id="加密：-1"><a href="#加密：-1" class="headerlink" title="加密："></a>加密：</h6><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span><stdio.h></stdio.h></span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><code class="hljs #include">#include &lt;stdint.h&gt;<br>#include &lt;string.h&gt;<br>#include &lt;stdlib.h&gt;<br><br>#define DELTA 0x9E3779B9<br>#define ROUNDS 32<br><br>// —————————<br>// TEA 单组加密（v0,v1）<br>// key: 16 字节<br>// —————————<br>void tea_encrypt_block(uint32_t *v, uint32_t *k) &#123;<br>    uint32_t v0 = v[0], v1 = v[1];<br>    uint32_t sum = 0;<br><br>    for (int i = 0; i &lt; ROUNDS; i++) &#123;<br>        sum += DELTA;<br>        v0 += ((v1 &lt;&lt; 4) + k[0]) ^ (v1 + sum) ^ ((v1 &gt;&gt; 5) + k[1]);<br>        v1 += ((v0 &lt;&lt; 4) + k[2]) ^ (v0 + sum) ^ ((v0 &gt;&gt; 5) + k[3]);<br>    &#125;<br><br>    v[0] = v0;<br>    v[1] = v1;<br>&#125;<br><br>// —————————<br>// 对任意长度明文进行 TEA 加密<br>// —————————<br>void tea_encrypt(uint8_t *plaintext, int len, uint8_t *key, uint8_t **ciphertext, int *cipher_len) &#123;<br>    // 填充到 8 字节倍数<br>    int pad_len = 8 - (len % 8);<br>    if (pad_len == 0) pad_len = 8;<br><br>    int total_len = len + pad_len;<br>    uint8_t *buf = (uint8_t *)malloc(total_len);<br>    memcpy(buf, plaintext, len);<br><br>    // PKCS7 填充<br>    for (int i = len; i &lt; total_len; i++) &#123;<br>        buf[i] = pad_len;<br>    &#125;<br><br>    *cipher_len = total_len;<br>    *ciphertext = (uint8_t *)malloc(total_len);<br><br>    // 将 key 拆成 4 个 32-bit<br>    uint32_t k[4];<br>    for (int i = 0; i &lt; 4; i++) &#123;<br>        k[i] = ((uint32_t)key[i*4] &lt;&lt; 24) | ((uint32_t)key[i*4 + 1] &lt;&lt; 16)<br>             | ((uint32_t)key[i*4 + 2] &lt;&lt; 8) | ((uint32_t)key[i*4 + 3]);<br>    &#125;<br><br>    // 每 8 字节分组加密<br>    for (int i = 0; i &lt; total_len; i += 8) &#123;<br>        uint32_t v[2];<br>        v[0] = ((uint32_t)buf[i] &lt;&lt; 24) | ((uint32_t)buf[i+1] &lt;&lt; 16)<br>             | ((uint32_t)buf[i+2] &lt;&lt; 8) | ((uint32_t)buf[i+3]);<br>        v[1] = ((uint32_t)buf[i+4] &lt;&lt; 24) | ((uint32_t)buf[i+5] &lt;&lt; 16)<br>             | ((uint32_t)buf[i+6] &lt;&lt; 8) | ((uint32_t)buf[i+7]);<br><br>        tea_encrypt_block(v, k);<br><br>        // 存回密文<br>        (*ciphertext)[i]   = (v[0] &gt;&gt; 24) &amp; 0xFF;<br>        (*ciphertext)[i+1] = (v[0] &gt;&gt; 16) &amp; 0xFF;<br>        (*ciphertext)[i+2] = (v[0] &gt;&gt; 8) &amp; 0xFF;<br>        (*ciphertext)[i+3] = v[0] &amp; 0xFF;<br><br>        (*ciphertext)[i+4] = (v[1] &gt;&gt; 24) &amp; 0xFF;<br>        (*ciphertext)[i+5] = (v[1] &gt;&gt; 16) &amp; 0xFF;<br>        (*ciphertext)[i+6] = (v[1] &gt;&gt; 8) &amp; 0xFF;<br>        (*ciphertext)[i+7] = v[1] &amp; 0xFF;<br>    &#125;<br><br>    free(buf);<br>&#125;<br><br>// —————————<br>// 测试 TEA 加密<br>// —————————<br>int main() &#123;<br>    uint8_t key[16] = ”1234567890abcdef“;  // 16 字节 key<br>    uint8_t plaintext[] = ”woshinibaba“;    // 明文<br>    uint8_t *ciphertext;<br>    int cipher_len;<br><br>    tea_encrypt(plaintext, strlen((char *)plaintext), key, &amp;ciphertext, &amp;cipher_len);<br><br>    printf(”密文 (HEX): “);<br>    for (int i = 0; i &lt; cipher_len; i++) &#123;<br>        printf(”%02X “, ciphertext[i]);<br>    &#125;<br>    printf(”\n“);<br><br>    free(ciphertext);<br>    return 0;<br>&#125;<br></code></pre></td></tr></table></figure></div><h6 id="解密："><a href="#解密：" class="headerlink" title="解密："></a>解密：</h6><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span><stdio.h></stdio.h></span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></td><td class="code"><pre><code class="hljs #include">#include &lt;stdint.h&gt;<br>#include &lt;string.h&gt;<br>#include &lt;stdlib.h&gt;<br><br>#define DELTA 0x9E3779B9<br>#define ROUNDS 32<br><br>// —————————<br>// TEA 单组解密（v0,v1）<br>// key: 16 字节<br>// —————————<br>void tea_decrypt_block(uint32_t *v, uint32_t *k) &#123;<br>    uint32_t v0 = v[0], v1 = v[1];<br>    uint32_t sum = DELTA * ROUNDS;  // 解密从最大 sum 开始<br><br>    for (int i = 0; i &lt; ROUNDS; i++) &#123;<br>        v1 -= ((v0 &lt;&lt; 4) + k[2]) ^ (v0 + sum) ^ ((v0 &gt;&gt; 5) + k[3]);<br>        v0 -= ((v1 &lt;&lt; 4) + k[0]) ^ (v1 + sum) ^ ((v1 &gt;&gt; 5) + k[1]);<br>        sum -= DELTA;<br>    &#125;<br><br>    v[0] = v0;<br>    v[1] = v1;<br>&#125;<br><br>// —————————<br>// 对任意长度密文进行 TEA 解密<br>// —————————<br>void tea_decrypt(uint8_t *ciphertext, int cipher_len, uint8_t *key, uint8_t **plaintext, int *plain_len) &#123;<br>    if (cipher_len % 8 != 0) &#123;<br>        printf(”密文长度必须是 8 的倍数\n“);<br>        *plaintext = NULL;<br>        *plain_len = 0;<br>        return;<br>    &#125;<br><br>    uint8_t *buf = (uint8_t *)malloc(cipher_len);<br><br>    // 将 key 拆成 4 个 32-bit<br>    uint32_t k[4];<br>    for (int i = 0; i &lt; 4; i++) &#123;<br>        k[i] = ((uint32_t)key[i*4] &lt;&lt; 24) | ((uint32_t)key[i*4 + 1] &lt;&lt; 16)<br>             | ((uint32_t)key[i*4 + 2] &lt;&lt; 8) | ((uint32_t)key[i*4 + 3]);<br>    &#125;<br><br>    // 每 8 字节分组解密<br>    for (int i = 0; i &lt; cipher_len; i += 8) &#123;<br>        uint32_t v[2];<br>        v[0] = ((uint32_t)ciphertext[i] &lt;&lt; 24) | ((uint32_t)ciphertext[i+1] &lt;&lt; 16)<br>             | ((uint32_t)ciphertext[i+2] &lt;&lt; 8) | ((uint32_t)ciphertext[i+3]);<br>        v[1] = ((uint32_t)ciphertext[i+4] &lt;&lt; 24) | ((uint32_t)ciphertext[i+5] &lt;&lt; 16)<br>             | ((uint32_t)ciphertext[i+6] &lt;&lt; 8) | ((uint32_t)ciphertext[i+7]);<br><br>        tea_decrypt_block(v, k);<br><br>        // 存回明文<br>        buf[i]   = (v[0] &gt;&gt; 24) &amp; 0xFF;<br>        buf[i+1] = (v[0] &gt;&gt; 16) &amp; 0xFF;<br>        buf[i+2] = (v[0] &gt;&gt; 8) &amp; 0xFF;<br>        buf[i+3] = v[0] &amp; 0xFF;<br><br>        buf[i+4] = (v[1] &gt;&gt; 24) &amp; 0xFF;<br>        buf[i+5] = (v[1] &gt;&gt; 16) &amp; 0xFF;<br>        buf[i+6] = (v[1] &gt;&gt; 8) &amp; 0xFF;<br>        buf[i+7] = v[1] &amp; 0xFF;<br>    &#125;<br><br>    // 去掉 PKCS7 填充<br>    int pad_len = buf[cipher_len - 1];<br>    if (pad_len &lt;= 0 || pad_len &gt; 8) pad_len = 0;  // 异常情况<br>    *plain_len = cipher_len - pad_len;<br><br>    *plaintext = (uint8_t *)malloc(*plain_len + 1);<br>    memcpy(*plaintext, buf, *plain_len);<br>    (*plaintext)[*plain_len] = ’\0‘;  // 末尾加 ’\0‘<br><br>    free(buf);<br>&#125;<br><br>// —————————<br>// 测试 TEA 加解密<br>// —————————<br>int main() &#123;<br>    uint8_t key[16] = ”1234567890abcdef“;  // 16 字节 key<br>    uint8_t plaintext[] = ”woshinibaba“;    // 明文<br><br>    uint8_t *ciphertext;<br>    int cipher_len;<br><br>    // 加密<br>    tea_encrypt(plaintext, strlen((char *)plaintext), key, &amp;ciphertext, &amp;cipher_len);<br><br>    printf(”密文 (HEX): “);<br>    for (int i = 0; i &lt; cipher_len; i++) &#123;<br>        printf(”%02X “, ciphertext[i]);<br>    &#125;<br>    printf(”\n“);<br><br>    // 解密<br>    uint8_t *decrypted;<br>    int decrypted_len;<br><br>    tea_decrypt(ciphertext, cipher_len, key, &amp;decrypted, &amp;decrypted_len);<br>    printf(”解密结果: %s\n“, decrypted);<br><br>    free(ciphertext);<br>    free(decrypted);<br>    return 0;<br>&#125;<br></code></pre></td></tr></table></figure></div>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;Tea&quot;&gt;&lt;a href=&quot;#Tea&quot; class=&quot;headerlink&quot; title=&quot;Tea&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Tea&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;（&lt;em&gt;Tiny Encryption Algorithm&lt;/em&gt;）｜分组加密算法&lt;/p&gt;
-&lt;p&gt;Basic Elements：&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;参数&lt;/th&gt;
-&lt;th&gt;说明&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td&gt;明文&lt;/td&gt;
-&lt;td&gt;64 比特（分为两个 32 位部分）&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;密钥&lt;/td&gt;
-&lt;td&gt;128 比特（分为 4 个 32 位部分）&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;轮数&lt;/td&gt;
-&lt;td&gt;64 次（32 轮循环，每轮包含两个半轮操作）&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;常量&lt;/td&gt;
-&lt;td&gt;&lt;code&gt;delta = 0x9E3779B9&lt;/code&gt; （即黄金分割常数的整数近似）&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;p&gt;首先，我们逐一对各个&lt;em&gt;&lt;strong&gt;element&lt;/strong&gt;&lt;/em&gt;进行分析解释：&lt;/p&gt;
-&lt;h6 id=&quot;明文：&quot;&gt;&lt;a href=&quot;#明文：&quot; class=&quot;headerlink&quot; title=&quot;明文：&quot;&gt;&lt;/a&gt;明文：&lt;/h6&gt;&lt;p&gt;明文长度不一定是64bit&lt;br&gt;明文不是 64 位（不是 8 字节）怎么办？——&lt;em&gt;&lt;strong&gt;必须填充（padding）到 8 字节的倍数&lt;/strong&gt;&lt;/em&gt;。&lt;br&gt;填充完之后再做处理。&lt;/p&gt;
-&lt;h6 id=&quot;分组：&quot;&gt;&lt;a href=&quot;#分组：&quot; class=&quot;headerlink&quot; title=&quot;分组：&quot;&gt;&lt;/a&gt;分组：&lt;/h6&gt;&lt;p&gt;明文填充（padding）到 8 字节的倍数需要分组。&lt;br&gt;example：&lt;br&gt;“helloctfgaoshou”，此字符串按照utf-8编码，标准的ASCII字符串的长度是15，很显然需要填充一个字符来达到8字节整数倍达到16字节。&lt;/p&gt;
-&lt;p&gt;此处按PKCS7Padding模式，按块所缺个数填充值。&lt;br&gt;例如：填充至符合块大小的整数倍，填充值为填充数量数，需要填充7个字节，就全部填07。&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Tea&quot;&gt;&lt;a href=&quot;#Tea&quot; class=&quot;headerlink&quot; title=&quot;Tea&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Tea&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;（&lt;em&gt;Tiny Encryption Algorithm&lt;/em&gt;）｜分组加</summary>
+      
     
     
     
@@ -258,16 +220,10 @@
     <content type="html"><![CDATA[<h1 id="RSA"><a href="#RSA" class="headerlink" title="RSA"></a><em><strong>RSA</strong></em></h1><p>RSA算法是一种非对称加密算法，它依赖于大数因子分解的难度，通过一对密钥（公钥和私钥）来实现数据的加密和解密。RSA算法的核心是两个大质数的选择和一系列数学运算。<br>密钥生成过程</p><p>RSA算法的密钥生成过程涉及以下步骤：<br>选择两个大质数 (p) 和 (q)，并计算它们的乘积 (N &#x3D; p * q)，这个 (N) 将作为公钥和私钥的一部分。<br>计算欧拉函数 (\Phi(N) &#x3D; (p-1) * (q-1))。<br>选择一个整数 (e)，使得 (1 &lt; e &lt; \Phi(N)) 且 (e) 与 (\Phi(N)) 互质，这个 (e) 将作为公钥的另一部分。<br>计算 (e) 的乘法逆元 (d)，使得 (d * e≡1(mod\Phi(N)))，这个 (d) 将作为私钥。<br>加密和解密过程</p><p>加密和解密的数学表达式分别为：<br>加密：(C &#x3D; M^e \mod N)<br>解密：(M &#x3D; C^d \mod N)<br>其中，(M) 是明文，(C) 是密文，(e) 和 (N) 组成公钥，(d) 和 (N) 组成私钥。<br>数学证明</p><p>RSA算法的正确性基于数学证明，其中涉及到欧拉定理和模运算的性质。证明的核心是展示加密后的密文通过解密可以得到原始的明文，即 (M^{ed} \mod N &#x3D; M)。<br>实现示例</p><p>以下是RSA算法的一个简化实现示例，展示了密钥生成、加密和解密的过程：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span>random</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs import">from sympy import isprime, mod_inverse<br></code></pre></td></tr></table></figure></div><h1 id="生成两个大质数p和q"><a href="#生成两个大质数p和q" class="headerlink" title="生成两个大质数p和q"></a>生成两个大质数p和q</h1><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span>generate_large_prime():</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs def">while True:<br>num = random.getrandbits(512)<br>if isprime(num):<br>return num<br><br>p = generate_large_prime()<br>q = generate_large_prime()<br></code></pre></td></tr></table></figure></div><h1 id="计算N和Phi-N"><a href="#计算N和Phi-N" class="headerlink" title="计算N和Phi(N)"></a>计算N和Phi(N)</h1><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs N">Phi_N = (p - 1) * (q - 1)<br></code></pre></td></tr></table></figure></div><h1 id="选择e"><a href="#选择e" class="headerlink" title="选择e"></a>选择e</h1><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs e">while math.gcd(e, Phi_N) != 1:<br>e = random.randrange(1, Phi_N)<br></code></pre></td></tr></table></figure></div><h1 id="计算d"><a href="#计算d" class="headerlink" title="计算d"></a>计算d</h1><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">d = mod_inverse(e, Phi_N)<br></code></pre></td></tr></table></figure></div><h1 id="公钥和私钥"><a href="#公钥和私钥" class="headerlink" title="公钥和私钥"></a>公钥和私钥</h1><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs public_key">private_key = (d, N)<br></code></pre></td></tr></table></figure></div><h1 id="加密和解密函数"><a href="#加密和解密函数" class="headerlink" title="加密和解密函数"></a>加密和解密函数</h1><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><figcaption><span>encrypt(plaintext, public_key):</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs def">e, N = public_key<br>ciphertext = [pow(ord(char), e, N) for char in plaintext]<br>return ciphertext<br><br>def decrypt(ciphertext, private_key):<br>d, N = private_key<br>plaintext = ’‘.join([chr(pow(char, d, N)) for char in ciphertext])<br>return plaintext<br></code></pre></td></tr></table></figure></div><h1 id="测试加密和解密"><a href="#测试加密和解密" class="headerlink" title="测试加密和解密"></a>测试加密和解密</h1><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">ciphertext = encrypt(plaintext, public_key)<br>decrypted_text = decrypt(ciphertext, private_key)<br><br>print(f’明文: &#123;plaintext&#125;‘)<br>print(f’加密后的密文: &#123;ciphertext&#125;‘)<br>print(f’解密后的明文: &#123;decrypted_text&#125;‘)<br></code></pre></td></tr></table></figure></div><p>在这个示例中，我们首先生成了两个大质数 (p) 和 (q)，然后计算了 (N) 和 (\Phi(N))。接着，我们选择了一个与 (\Phi(N)) 互质的整数 (e) 作为公钥的一部分，并计算了 (e) 的乘法逆元 (d) 作为私钥。最后，我们定义了加密和解密函数，并对一个简单的明文进行了加密和解密操作。</p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;RSA&quot;&gt;&lt;a href=&quot;#RSA&quot; class=&quot;headerlink&quot; title=&quot;RSA&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;RSA&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;RSA算法是一种非对称加密算法，它依赖于大数因子分解的难度，通过一对密钥（公钥和私钥）来实现数据的加密和解密。RSA算法的核心是两个大质数的选择和一系列数学运算。&lt;br&gt;密钥生成过程&lt;/p&gt;
-&lt;p&gt;RSA算法的密钥生成过程涉及以下步骤：&lt;br&gt;选择两个大质数 (p) 和 (q)，并计算它们的乘积 (N &amp;#x3D; p * q)，这个 (N) 将作为公钥和私钥的一部分。&lt;br&gt;计算欧拉函数 (&#92;Phi(N) &amp;#x3D; (p-1) * (q-1))。&lt;br&gt;选择一个整数 (e)，使得 (1 &amp;lt; e &amp;lt; &#92;Phi(N)) 且 (e) 与 (&#92;Phi(N)) 互质，这个 (e) 将作为公钥的另一部分。&lt;br&gt;计算 (e) 的乘法逆元 (d)，使得 (d * e≡1(mod&#92;Phi(N)))，这个 (d) 将作为私钥。&lt;br&gt;加密和解密过程&lt;/p&gt;
-&lt;p&gt;加密和解密的数学表达式分别为：&lt;br&gt;加密：(C &amp;#x3D; M^e &#92;mod N)&lt;br&gt;解密：(M &amp;#x3D; C^d &#92;mod N)&lt;br&gt;其中，(M) 是明文，(C) 是密文，(e) 和 (N) 组成公钥，(d) 和 (N) 组成私钥。&lt;br&gt;数学证明&lt;/p&gt;
-&lt;p&gt;RSA算法的正确性基于数学证明，其中涉及到欧拉定理和模运算的性质。证明的核心是展示加密后的密文通过解密可以得到原始的明文，即 (M^{ed} &#92;mod N &amp;#x3D; M)。&lt;br&gt;实现示例&lt;/p&gt;
-&lt;p&gt;以下是RSA算法的一个简化实现示例，展示了密钥生成、加密和解密的过程：&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;figcaption&gt;&lt;span&gt;random&lt;/span&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs import&quot;&gt;from sympy import isprime, mod_inverse&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-
-&lt;h1 id=&quot;生成两个大质数p和q&quot;&gt;&lt;a href=&quot;#生成两个大质数p和q&quot; class=&quot;headerlink&quot; title=&quot;生成两个大质数p和q&quot;&gt;&lt;/a&gt;生成两个大质数p和q&lt;/h1&gt;&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;figcaption&gt;&lt;span&gt;generate_large_prime():&lt;/span&gt;&lt;/figcaption&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs def&quot;&gt;while True:&lt;br&gt;num = random.getrandbits(512)&lt;br&gt;if isprime(num):&lt;br&gt;return num&lt;br&gt;&lt;br&gt;p = generate_large_prime()&lt;br&gt;q = generate_large_prime()&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-
-&lt;h1 id=&quot;计算N和Phi-N&quot;&gt;&lt;a href=&quot;#计算N和Phi-N&quot; class=&quot;headerlink&quot; title=&quot;计算N和Phi(N)&quot;&gt;&lt;/a&gt;计算N和Phi(N)&lt;/h1&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;RSA&quot;&gt;&lt;a href=&quot;#RSA&quot; class=&quot;headerlink&quot; title=&quot;RSA&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;RSA&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;RSA算法是一种非对称加密算法，它依赖于大数因子分解的难度，通过一对密钥（公钥和</summary>
+      
     
     
     
@@ -288,13 +244,10 @@
     <content type="html"><![CDATA[<h1 id="Pyrdp-convert路径ErrorSolve"><a href="#Pyrdp-convert路径ErrorSolve" class="headerlink" title="Pyrdp-convert路径ErrorSolve"></a><em><strong>Pyrdp-convert路径ErrorSolve</strong></em></h1><h3 id="1-问题识别"><a href="#1-问题识别" class="headerlink" title="1. 问题识别"></a>1. 问题识别</h3><p>执行 pyrdp-convert rdp_dec.pcap -o out 命令时出现大量错误：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[-] Failed to handle data, continuing anyway: [Errno 2] No such file or <br>directory: &#x27;D_\\Forensicstools\\envs\\out\\20170823082818_192.168.43.<br>185_59921-192.168.43.130_3389.pyrdp&#x27;<br></code></pre></td></tr></table></figure></div><p>注意到路径中的 D: 被错误地替换为 D_ （冒号变成了下划线），导致系统无法找到正确的文件路径。</p><h3 id="2-定位问题代码"><a href="#2-定位问题代码" class="headerlink" title="2. 定位问题代码"></a>2. 定位问题代码</h3><p>通过分析代码，我发现问题出在 d:\Forensicstools\envs\pyrdp\pyrdp\recording\recorder.py 文件中的 FileLayer 类：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">self.filename = fileName<br>self.filename = str(self.filename).replace(&quot;:&quot;, &quot;_&quot;)  # 错误行：替换了所有冒号<br></code></pre></td></tr></table></figure></div><p>这段代码将文件名中的 所有 冒号替换为下划线，包括 Windows 驱动器号中的冒号（如 D: ）。</p><h3 id="3-修复方案"><a href="#3-修复方案" class="headerlink" title="3. 修复方案"></a>3. 修复方案</h3><p>我修改了代码，使其能够识别并保留 Windows 驱动器号中的冒号，同时替换文件名中其他位置的冒号：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">self.filename = fileName<br># 保留 Windows 驱动器号中的冒号<br>filename_str = str(self.filename)<br>if len(filename_str) &gt; 1 and filename_str[1] == &#x27;:&#x27;:<br>    # 保留第一个冒号（驱动器号）<br>    self.filename = filename_str[0:2] + filename_str[2:].replace(&quot;:&quot;, &quot;_&quot;)<br>else:<br>    # 对非 Windows 路径替换所有冒号<br>    self.filename = filename_str.replace(&quot;:&quot;, &quot;_&quot;)<br></code></pre></td></tr></table></figure></div><h3 id="4-验证修复"><a href="#4-验证修复" class="headerlink" title="4. 验证修复"></a>4. 验证修复</h3><p>使用虚拟环境中的可执行文件测试修复后的命令：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">pyrdp-env\Scripts\pyrdp-convert.exe rdp_dec.pcap -o out<br></code></pre></td></tr></table></figure></div><p>命令成功执行，生成了预期的输出文件：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[*] Analyzing PCAP &#x27;rdp_dec.pcap&#x27; ...<br>    - 192.168.43.185:59921 -&gt; 192.168.43.130:3389 : plaintext<br>[*] Processing 192.168.43.185:59921 -&gt; 192.168.43.130:3389<br>100% (1858 of 1858) || Elapsed Time: 0:00:00 Time:  0:00:00<br><br>[+] Successfully wrote &#x27;D:\Forensicstools\envs\out\20170823082818_192.168.<br>43.185_59921-192.168.43.130_3389.pyrdp&#x27;<br></code></pre></td></tr></table></figure></div><h3 id="5-修复效果"><a href="#5-修复效果" class="headerlink" title="5. 修复效果"></a>5. 修复效果</h3><p>从输出结果可以看到，路径中的驱动器号 D: 被正确保留，文件成功生成在指定的输出目录中。</p><p>这个修复确保了 pyrdp-convert 工具能够在 Windows 系统上正确处理文件路径，同时保持对非 Windows 系统的兼容性。</p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;Pyrdp-convert路径ErrorSolve&quot;&gt;&lt;a href=&quot;#Pyrdp-convert路径ErrorSolve&quot; class=&quot;headerlink&quot; title=&quot;Pyrdp-convert路径ErrorSolve&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Pyrdp-convert路径ErrorSolve&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;h3 id=&quot;1-问题识别&quot;&gt;&lt;a href=&quot;#1-问题识别&quot; class=&quot;headerlink&quot; title=&quot;1. 问题识别&quot;&gt;&lt;/a&gt;1. 问题识别&lt;/h3&gt;&lt;p&gt;执行 pyrdp-convert rdp_dec.pcap -o out 命令时出现大量错误：&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;[-] Failed to handle data, continuing anyway: [Errno 2] No such file or &lt;br&gt;directory: &amp;#x27;D_&#92;&#92;Forensicstools&#92;&#92;envs&#92;&#92;out&#92;&#92;20170823082818_192.168.43.&lt;br&gt;185_59921-192.168.43.130_3389.pyrdp&amp;#x27;&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-&lt;p&gt;注意到路径中的 D: 被错误地替换为 D_ （冒号变成了下划线），导致系统无法找到正确的文件路径。&lt;/p&gt;
-&lt;h3 id=&quot;2-定位问题代码&quot;&gt;&lt;a href=&quot;#2-定位问题代码&quot; class=&quot;headerlink&quot; title=&quot;2. 定位问题代码&quot;&gt;&lt;/a&gt;2. 定位问题代码&lt;/h3&gt;&lt;p&gt;通过分析代码，我发现问题出在 d:&#92;Forensicstools&#92;envs&#92;pyrdp&#92;pyrdp&#92;recording&#92;recorder.py 文件中的 FileLayer 类：&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;self.filename = fileName&lt;br&gt;self.filename = str(self.filename).replace(&amp;quot;:&amp;quot;, &amp;quot;_&amp;quot;)  # 错误行：替换了所有冒号&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-&lt;p&gt;这段代码将文件名中的 所有 冒号替换为下划线，包括 Windows 驱动器号中的冒号（如 D: ）。&lt;/p&gt;
-&lt;h3 id=&quot;3-修复方案&quot;&gt;&lt;a href=&quot;#3-修复方案&quot; class=&quot;headerlink&quot; title=&quot;3. 修复方案&quot;&gt;&lt;/a&gt;3. 修复方案&lt;/h3&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Pyrdp-convert路径ErrorSolve&quot;&gt;&lt;a href=&quot;#Pyrdp-convert路径ErrorSolve&quot; class=&quot;headerlink&quot; title=&quot;Pyrdp-convert路径ErrorSolve&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong</summary>
+      
     
     
     
@@ -315,521 +268,13 @@
     <content type="html"><![CDATA[<h1 id="EzUSB"><a href="#EzUSB" class="headerlink" title="EzUSB"></a><em><strong>EzUSB</strong></em></h1><from bugku><p>一个简单的USB流量</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251127100523716.png" alt="img"></p><p>点开第一个流量发现抓捕到payload,第三个字节为09.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251127100934440.png" alt="img"></p><p>表示USB Device向HOST发送了信息,“<strong>Leftover Capture Data</strong>” 就是 <em>USBPcap</em> 抓到的 EP 数据（payload）</p><p>根据HID 键盘标准表:</p><p>以下<strong>kecode</strong>对应的就是usage ID</p><table><thead><tr><th align="center">Keycode</th><th align="center">键</th><th align="center">ASCII</th></tr></thead><tbody><tr><td align="center">0x04</td><td align="center">a</td><td align="center">61</td></tr><tr><td align="center">0x05</td><td align="center">b</td><td align="center">62</td></tr><tr><td align="center">0x06</td><td align="center">c</td><td align="center">63</td></tr><tr><td align="center">0x07</td><td align="center">d</td><td align="center">64</td></tr><tr><td align="center">0x08</td><td align="center">e</td><td align="center">65</td></tr><tr><td align="center">0x09</td><td align="center">f</td><td align="center">66</td></tr><tr><td align="center">0x0A</td><td align="center">g</td><td align="center">67</td></tr><tr><td align="center">0x0B</td><td align="center">h</td><td align="center">68</td></tr><tr><td align="center">0x0C</td><td align="center">i</td><td align="center">69</td></tr><tr><td align="center">0x0D</td><td align="center">j</td><td align="center">6A</td></tr><tr><td align="center">0x0E</td><td align="center">k</td><td align="center">6B</td></tr><tr><td align="center">0x0F</td><td align="center">l</td><td align="center">6C</td></tr><tr><td align="center">0x10</td><td align="center">m</td><td align="center">6D</td></tr><tr><td align="center">0x11</td><td align="center">n</td><td align="center">6E</td></tr><tr><td align="center">0x12</td><td align="center">o</td><td align="center">6F</td></tr><tr><td align="center">0x13</td><td align="center">p</td><td align="center">70</td></tr><tr><td align="center">0x14</td><td align="center">q</td><td align="center">71</td></tr><tr><td align="center">0x15</td><td align="center">r</td><td align="center">72</td></tr><tr><td align="center">0x16</td><td align="center">s</td><td align="center">73</td></tr><tr><td align="center">0x17</td><td align="center">t</td><td align="center">74</td></tr><tr><td align="center">0x18</td><td align="center">u</td><td align="center">75</td></tr><tr><td align="center">0x19</td><td align="center">v</td><td align="center">76</td></tr><tr><td align="center">0x1A</td><td align="center">w</td><td align="center">77</td></tr><tr><td align="center">0x1B</td><td align="center">x</td><td align="center">78</td></tr><tr><td align="center">0x1C</td><td align="center">y</td><td align="center">79</td></tr><tr><td align="center">0x1D</td><td align="center">z</td><td align="center">7A</td></tr></tbody></table><p>那么09对应的就是键盘上的  <strong>f</strong></p><p>其他的键对应的usage ID的表如下:</p><h6 id="数字"><a href="#数字" class="headerlink" title="数字:"></a><em><strong>数字:</strong></em></h6><table><thead><tr><th align="center">Keycode</th><th align="center">键</th><th align="center">未按 Shift</th><th align="center">按下 Shift</th></tr></thead><tbody><tr><td align="center">0x1E</td><td align="center">1</td><td align="center"><code>1</code></td><td align="center"><code>!</code></td></tr><tr><td align="center">0x1F</td><td align="center">2</td><td align="center"><code>2</code></td><td align="center"><code>@</code></td></tr><tr><td align="center">0x20</td><td align="center">3</td><td align="center"><code>3</code></td><td align="center"><code>#</code></td></tr><tr><td align="center">0x21</td><td align="center">4</td><td align="center"><code>4</code></td><td align="center"><code>$</code></td></tr><tr><td align="center">0x22</td><td align="center">5</td><td align="center"><code>5</code></td><td align="center"><code>%</code></td></tr><tr><td align="center">0x23</td><td align="center">6</td><td align="center"><code>6</code></td><td align="center"><code>^</code></td></tr><tr><td align="center">0x24</td><td align="center">7</td><td align="center"><code>7</code></td><td align="center"><code>&amp;</code></td></tr><tr><td align="center">0x25</td><td align="center">8</td><td align="center"><code>8</code></td><td align="center"><code>*</code></td></tr><tr><td align="center">0x26</td><td align="center">9</td><td align="center"><code>9</code></td><td align="center"><code>(</code></td></tr><tr><td align="center">0x27</td><td align="center">0</td><td align="center"><code>0</code></td><td align="center"><code>)</code></td></tr></tbody></table><h6 id="控制键"><a href="#控制键" class="headerlink" title="控制键"></a><em><strong>控制键</strong></em></h6><table><thead><tr><th align="center">Keycode</th><th align="center">功能</th></tr></thead><tbody><tr><td align="center">0x28</td><td align="center">Enter</td></tr><tr><td align="center">0x29</td><td align="center">ESC</td></tr><tr><td align="center">0x2A</td><td align="center">Backspace</td></tr><tr><td align="center">0x2B</td><td align="center">Tab</td></tr><tr><td align="center">0x2C</td><td align="center">Space</td></tr></tbody></table><h6 id="符号键"><a href="#符号键" class="headerlink" title="符号键"></a><em><strong>符号键</strong></em></h6><table><thead><tr><th align="center">Keycode</th><th align="center">未按 Shift</th><th align="center">按下 Shift</th></tr></thead><tbody><tr><td align="center">0x2D</td><td align="center"><code>-</code></td><td align="center"><code>_</code></td></tr><tr><td align="center">0x2E</td><td align="center"><code>=</code></td><td align="center"><code>+</code></td></tr><tr><td align="center">0x2F</td><td align="center"><code>[</code></td><td align="center"><code>{</code></td></tr><tr><td align="center">0x30</td><td align="center"><code>]</code></td><td align="center"><code>}</code></td></tr><tr><td align="center">0x31</td><td align="center"><code>\</code></td><td align="center">&#96;</td></tr><tr><td align="center">0x32</td><td align="center"><code>Non-US #</code></td><td align="center"><code>~</code>（因键盘而异）</td></tr><tr><td align="center">0x33</td><td align="center"><code>;</code></td><td align="center"><code>:</code></td></tr><tr><td align="center">0x34</td><td align="center"><code>&#39;</code></td><td align="center"><code>&quot;</code></td></tr><tr><td align="center">0x35</td><td align="center">&#96;&#96;&#96;</td><td align="center"><code>~</code></td></tr><tr><td align="center">0x36</td><td align="center"><code>,</code></td><td align="center"><code>&lt;</code></td></tr><tr><td align="center">0x37</td><td align="center"><code>.</code></td><td align="center"><code>&gt;</code></td></tr><tr><td align="center">0x38</td><td align="center"><code>/</code></td><td align="center"><code>?</code></td></tr></tbody></table><h6 id="功能键"><a href="#功能键" class="headerlink" title="功能键"></a><em><strong>功能键</strong></em></h6><table><thead><tr><th align="center">Keycode</th><th align="center">键</th></tr></thead><tbody><tr><td align="center">0x3A</td><td align="center">F1</td></tr><tr><td align="center">0x3B</td><td align="center">F2</td></tr><tr><td align="center">0x3C</td><td align="center">F3</td></tr><tr><td align="center">0x3D</td><td align="center">F4</td></tr><tr><td align="center">0x3E</td><td align="center">F5</td></tr><tr><td align="center">0x3F</td><td align="center">F6</td></tr><tr><td align="center">0x40</td><td align="center">F7</td></tr><tr><td align="center">0x41</td><td align="center">F8</td></tr><tr><td align="center">0x42</td><td align="center">F9</td></tr><tr><td align="center">0x43</td><td align="center">F10</td></tr><tr><td align="center">0x44</td><td align="center">F11</td></tr><tr><td align="center">0x45</td><td align="center">F12</td></tr></tbody></table><h6 id="导航键"><a href="#导航键" class="headerlink" title="导航键"></a><em><strong>导航键</strong></em></h6><table><thead><tr><th align="center">Keycode</th><th align="center">键</th></tr></thead><tbody><tr><td align="center">0x4A</td><td align="center">Home</td></tr><tr><td align="center">0x4B</td><td align="center">PageUp</td></tr><tr><td align="center">0x4C</td><td align="center">Delete</td></tr><tr><td align="center">0x4D</td><td align="center">End</td></tr><tr><td align="center">0x4E</td><td align="center">PageDown</td></tr><tr><td align="center">0x4F</td><td align="center">Right Arrow</td></tr><tr><td align="center">0x50</td><td align="center">Left Arrow</td></tr><tr><td align="center">0x51</td><td align="center">Down Arrow</td></tr><tr><td align="center">0x52</td><td align="center">Up Arrow</td></tr></tbody></table><h6 id="小键盘"><a href="#小键盘" class="headerlink" title="小键盘"></a><em><strong>小键盘</strong></em></h6><table><thead><tr><th align="center">Keycode</th><th align="center">键</th></tr></thead><tbody><tr><td align="center">0x53</td><td align="center">Num Lock</td></tr><tr><td align="center">0x54</td><td align="center">&#x2F;</td></tr><tr><td align="center">0x55</td><td align="center">*</td></tr><tr><td align="center">0x56</td><td align="center">-</td></tr><tr><td align="center">0x57</td><td align="center">+</td></tr><tr><td align="center">0x58</td><td align="center">Enter</td></tr><tr><td align="center">0x59</td><td align="center">1</td></tr><tr><td align="center">0x5A</td><td align="center">2</td></tr><tr><td align="center">0x5B</td><td align="center">3</td></tr><tr><td align="center">0x5C</td><td align="center">4</td></tr><tr><td align="center">0x5D</td><td align="center">5</td></tr><tr><td align="center">0x5E</td><td align="center">6</td></tr><tr><td align="center">0x5F</td><td align="center">7</td></tr><tr><td align="center">0x60</td><td align="center">8</td></tr><tr><td align="center">0x61</td><td align="center">9</td></tr><tr><td align="center">0x62</td><td align="center">0</td></tr><tr><td align="center">0x63</td><td align="center">.</td></tr></tbody></table><p>回到那个<em><strong>leftover capture data</strong></em></p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">00 00 09 00 00 00 00 00<br></code></pre></td></tr></table></figure></div><p>在 HID Boot Report 格式下，对数据 <code>00 00 09 00 00 00 00 00</code> 各字段的含义解析如下：</p><ul><li><strong>字节 0（Modifier）：<code> 00</code></strong>：表示无修饰键被按下，即没有按下 Ctrl、Shift、Alt、GUI 等修饰键。</li><li><strong>字节 1（Reserved）：<code> 00</code></strong>：该字节为保留字节，在 HID Boot Report 格式中不做具体使用。</li><li><strong>字节 2（Keycode #1）：<code> 09</code></strong>：代表第一个被按下的键的 HID usage ID，也就是第一个按键的键码。</li><li><strong>字节 3 - 7（Keycode #2–#6）：<code> 00 00 00 00 00</code></strong>：表示除了第一个按键外，没有其他非修饰键被按下。</li></ul><p>我们再看一个:</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251127105448599.png" alt="img"></p><p><code>Leftover Capture Data: 20002f0000000000</code> 是一组字节数据，按照常见的 HID 报告格式，可对其各字节含义进行如下解析：</p><h3 id="第-1-字节-20"><a href="#第-1-字节-20" class="headerlink" title="第 1 字节: 20"></a>第 1 字节: 20</h3><p>将 <code>20</code> 转换为二进制是 <code>0010 0000</code>，这表示第 5 位被置 1，对应的是 Right Shift 键被按下。根据 HID 协议中修饰键位的定义，该字节用于表示修饰键的状态，所以此数据表明当前按下了 Right Shift 键 <em>1</em>。</p><h3 id="第-2-字节-00"><a href="#第-2-字节-00" class="headerlink" title="第 2 字节: 00"></a>第 2 字节: 00</h3><p>通常该字节为保留字节，<code> 00</code> 表示此保留位无特殊含义。</p><h3 id="第-3-字节-2f"><a href="#第-3-字节-2f" class="headerlink" title="第 3 字节: 2f"></a>第 3 字节: 2f</h3><p>参考脚本中的映射关系，<code> 0x2F</code> 对应的字符是 <code>[</code>，所以该字节表示当前按下的按键对应的扫描码为 <code>[</code> 。</p><h3 id="第-4-8-字节-00000000"><a href="#第-4-8-字节-00000000" class="headerlink" title="第 4 - 8 字节: 00000000"></a>第 4 - 8 字节: 00000000</h3><p>这几个字节通常用于表示其他按键，<code> 00</code> 表示当前没有其他额外的按键被按下。</p><p>综合起来，<code>Leftover Capture Data: 20002f0000000000</code> 表示当前按下了 Right Shift 键和 <code>[</code> 键。</p><p>Right Shift 键和 <code>[</code> 键这个组合键的对应的输入就是    <strong>{</strong></p><p>那么整个的就可以得到所有键入信息.</p><p>最后可以使用  <a class="link" href="https://tools.qsnctf.com/#!">青少年CTF在线工具箱<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p></from>]]></content>
     
     
+      
+      
     <summary type="html">&lt;h1 id=&quot;EzUSB&quot;&gt;&lt;a href=&quot;#EzUSB&quot; class=&quot;headerlink&quot; title=&quot;EzUSB&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;EzUSB&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;from bugku&gt;
 
 &lt;p&gt;一个简单的USB流量&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251127100523716.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;点开第一个流量发现抓捕到payload,第三个字节为09.&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251127100934440.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;表示USB Device向HOST发送了信息,“&lt;strong&gt;Leftover Capture Data&lt;/strong&gt;” 就是 &lt;em&gt;USBPcap&lt;/em&gt; 抓到的 EP 数据（payload）&lt;/p&gt;
-&lt;p&gt;根据HID 键盘标准表:&lt;/p&gt;
-&lt;p&gt;以下&lt;strong&gt;kecode&lt;/strong&gt;对应的就是usage ID&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&quot;center&quot;&gt;Keycode&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;键&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;ASCII&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x04&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;a&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;61&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x05&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;b&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;62&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x06&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;c&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;63&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x07&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;d&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;64&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x08&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;e&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;65&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x09&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;f&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;66&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x0A&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;g&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;67&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x0B&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;h&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;68&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x0C&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;i&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;69&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x0D&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;j&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;6A&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x0E&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;k&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;6B&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x0F&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;l&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;6C&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x10&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;m&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;6D&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x11&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;n&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;6E&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x12&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;o&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;6F&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x13&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;p&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;70&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x14&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;q&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;71&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x15&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;r&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;72&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x16&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;s&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;73&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x17&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;t&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;74&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x18&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;u&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;75&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x19&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;v&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;76&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x1A&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;w&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;77&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x1B&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;x&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;78&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x1C&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;y&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;79&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x1D&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;z&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;7A&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;p&gt;那么09对应的就是键盘上的  &lt;strong&gt;f&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;其他的键对应的usage ID的表如下:&lt;/p&gt;
-&lt;h6 id=&quot;数字&quot;&gt;&lt;a href=&quot;#数字&quot; class=&quot;headerlink&quot; title=&quot;数字:&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;数字:&lt;/strong&gt;&lt;/em&gt;&lt;/h6&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&quot;center&quot;&gt;Keycode&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;键&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;未按 Shift&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;按下 Shift&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x1E&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;1&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;1&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;!&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x1F&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;2&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;2&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;@&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x20&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;3&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;3&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;#&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x21&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;4&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;4&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;$&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x22&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;5&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;5&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;%&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x23&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;6&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;6&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;^&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x24&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;7&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;7&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;&amp;amp;&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x25&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;8&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;8&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;*&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x26&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;9&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;9&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;(&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x27&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;0&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;0&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;)&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;h6 id=&quot;控制键&quot;&gt;&lt;a href=&quot;#控制键&quot; class=&quot;headerlink&quot; title=&quot;控制键&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;控制键&lt;/strong&gt;&lt;/em&gt;&lt;/h6&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&quot;center&quot;&gt;Keycode&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;功能&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x28&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Enter&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x29&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;ESC&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x2A&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Backspace&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x2B&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Tab&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x2C&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Space&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;h6 id=&quot;符号键&quot;&gt;&lt;a href=&quot;#符号键&quot; class=&quot;headerlink&quot; title=&quot;符号键&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;符号键&lt;/strong&gt;&lt;/em&gt;&lt;/h6&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&quot;center&quot;&gt;Keycode&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;未按 Shift&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;按下 Shift&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x2D&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;-&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;_&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x2E&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;=&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;+&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x2F&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;[&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;{&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x30&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;]&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;}&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x31&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;&#92;&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&amp;#96;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x32&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;Non-US #&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;~&lt;/code&gt;（因键盘而异）&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x33&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;;&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;:&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x34&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;&amp;#39;&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;&amp;quot;&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x35&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&amp;#96;&amp;#96;&amp;#96;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;~&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x36&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;,&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;&amp;lt;&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x37&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;.&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;&amp;gt;&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x38&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;/&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&lt;code&gt;?&lt;/code&gt;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;h6 id=&quot;功能键&quot;&gt;&lt;a href=&quot;#功能键&quot; class=&quot;headerlink&quot; title=&quot;功能键&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;功能键&lt;/strong&gt;&lt;/em&gt;&lt;/h6&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&quot;center&quot;&gt;Keycode&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;键&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x3A&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F1&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x3B&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F2&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x3C&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F3&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x3D&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F4&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x3E&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F5&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x3F&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F6&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x40&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F7&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x41&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F8&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x42&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F9&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x43&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F10&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x44&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F11&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x45&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;F12&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;h6 id=&quot;导航键&quot;&gt;&lt;a href=&quot;#导航键&quot; class=&quot;headerlink&quot; title=&quot;导航键&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;导航键&lt;/strong&gt;&lt;/em&gt;&lt;/h6&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&quot;center&quot;&gt;Keycode&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;键&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x4A&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Home&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x4B&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;PageUp&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x4C&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Delete&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x4D&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;End&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x4E&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;PageDown&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x4F&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Right Arrow&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x50&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Left Arrow&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x51&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Down Arrow&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x52&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Up Arrow&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;h6 id=&quot;小键盘&quot;&gt;&lt;a href=&quot;#小键盘&quot; class=&quot;headerlink&quot; title=&quot;小键盘&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;小键盘&lt;/strong&gt;&lt;/em&gt;&lt;/h6&gt;&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&quot;center&quot;&gt;Keycode&lt;/th&gt;
-&lt;th align=&quot;center&quot;&gt;键&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x53&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Num Lock&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x54&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;&amp;#x2F;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x55&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;*&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x56&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x57&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;+&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x58&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;Enter&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x59&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;1&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x5A&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;2&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x5B&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;3&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x5C&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;4&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x5D&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;5&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x5E&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;6&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x5F&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;7&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x60&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;8&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x61&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;9&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x62&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;0&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td align=&quot;center&quot;&gt;0x63&lt;/td&gt;
-&lt;td align=&quot;center&quot;&gt;.&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;p&gt;回到那个&lt;em&gt;&lt;strong&gt;leftover capture data&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;00 00 09 00 00 00 00 00&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-
-&lt;p&gt;在 HID Boot Report 格式下，对数据 &lt;code&gt;00 00 09 00 00 00 00 00&lt;/code&gt; 各字段的含义解析如下：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;字节 0（Modifier）：&lt;code&gt; 00&lt;/code&gt;&lt;/strong&gt;：表示无修饰键被按下，即没有按下 Ctrl、Shift、Alt、GUI 等修饰键。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;字节 1（Reserved）：&lt;code&gt; 00&lt;/code&gt;&lt;/strong&gt;：该字节为保留字节，在 HID Boot Report 格式中不做具体使用。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;字节 2（Keycode #1）：&lt;code&gt; 09&lt;/code&gt;&lt;/strong&gt;：代表第一个被按下的键的 HID usage ID，也就是第一个按键的键码。&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;字节 3 - 7（Keycode #2–#6）：&lt;code&gt; 00 00 00 00 00&lt;/code&gt;&lt;/strong&gt;：表示除了第一个按键外，没有其他非修饰键被按下。&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;我们再看一个:&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251127105448599.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;Leftover Capture Data: 20002f0000000000&lt;/code&gt; 是一组字节数据，按照常见的 HID 报告格式，可对其各字节含义进行如下解析：&lt;/p&gt;
-&lt;h3 id=&quot;第-1-字节-20&quot;&gt;&lt;a href=&quot;#第-1-字节-20&quot; class=&quot;headerlink&quot; title=&quot;第 1 字节: 20&quot;&gt;&lt;/a&gt;第 1 字节: 20&lt;/h3&gt;&lt;p&gt;将 &lt;code&gt;20&lt;/code&gt; 转换为二进制是 &lt;code&gt;0010 0000&lt;/code&gt;，这表示第 5 位被置 1，对应的是 Right Shift 键被按下。根据 HID 协议中修饰键位的定义，该字节用于表示修饰键的状态，所以此数据表明当前按下了 Right Shift 键 &lt;em&gt;1&lt;/em&gt;。&lt;/p&gt;
-&lt;h3 id=&quot;第-2-字节-00&quot;&gt;&lt;a href=&quot;#第-2-字节-00&quot; class=&quot;headerlink&quot; title=&quot;第 2 字节: 00&quot;&gt;&lt;/a&gt;第 2 字节: 00&lt;/h3&gt;&lt;p&gt;通常该字节为保留字节，&lt;code&gt; 00&lt;/code&gt; 表示此保留位无特殊含义。&lt;/p&gt;
-&lt;h3 id=&quot;第-3-字节-2f&quot;&gt;&lt;a href=&quot;#第-3-字节-2f&quot; class=&quot;headerlink&quot; title=&quot;第 3 字节: 2f&quot;&gt;&lt;/a&gt;第 3 字节: 2f&lt;/h3&gt;&lt;p&gt;参考脚本中的映射关系，&lt;code&gt; 0x2F&lt;/code&gt; 对应的字符是 &lt;code&gt;[&lt;/code&gt;，所以该字节表示当前按下的按键对应的扫描码为 &lt;code&gt;[&lt;/code&gt; 。&lt;/p&gt;
-&lt;h3 id=&quot;第-4-8-字节-00000000&quot;&gt;&lt;a href=&quot;#第-4-8-字节-00000000&quot; class=&quot;headerlink&quot; title=&quot;第 4 - 8 字节: 00000000&quot;&gt;&lt;/a&gt;第 4 - 8 字节: 00000000&lt;/h3&gt;&lt;p&gt;这几个字节通常用于表示其他按键，&lt;code&gt; 00&lt;/code&gt; 表示当前没有其他额外的按键被按下。&lt;/p&gt;
-&lt;p&gt;综合起来，&lt;code&gt;Leftover Capture Data: 20002f0000000000&lt;/code&gt; 表示当前按下了 Right Shift 键和 &lt;code&gt;[&lt;/code&gt; 键。&lt;/p&gt;
-&lt;p&gt;Right Shift 键和 &lt;code&gt;[&lt;/code&gt; 键这个组合键的对应的输入就是    &lt;strong&gt;{&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;那么整个的就可以得到所有键入信息.&lt;/p&gt;
-&lt;p&gt;最后可以使用  &lt;a class=&quot;link&quot; href=&quot;https://tools.qsnctf.com/#!&quot;&gt;青少年CTF在线工具箱&lt;i class=&quot;fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon&quot;&gt;&lt;/i&gt;&lt;/a&gt;&lt;/p&gt;
-&lt;/from&gt;</summary>
+&lt;p&gt;</summary>
+      
     
     
     
@@ -850,19 +295,11 @@
     <content type="html"><![CDATA[<p><strong>UBIFS</strong>（Unsorted Block Image File System）是针对闪存设备设计的文件系统。我详细介绍一下UBIFS镜像的处理和分析：</p><h2 id="UBIFS-概述"><a href="#UBIFS-概述" class="headerlink" title="UBIFS 概述"></a>UBIFS 概述</h2><h3 id="特点"><a href="#特点" class="headerlink" title="特点"></a><strong>特点</strong></h3><ul><li>专为<strong>原始闪存设备</strong>设计</li><li>支持<strong>磨损均衡</strong>、<strong>坏块管理</strong></li><li>提供<strong>数据压缩</strong>、<strong>数据完整性</strong></li><li>用于嵌入式Linux系统</li></ul><h2 id="UBIFS镜像结构"><a href="#UBIFS镜像结构" class="headerlink" title="UBIFS镜像结构"></a>UBIFS镜像结构</h2><h3 id="镜像组成"><a href="#镜像组成" class="headerlink" title="镜像组成"></a><strong>镜像组成</strong></h3><p>text</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">UBIFS镜像 → UBI卷 → UBIFS文件系统<br>    ↓           ↓           ↓<br>  .ubif文件  包含多个  实际文件系统<br>             物理擦除块<br></code></pre></td></tr></table></figure></div><h3 id="层次结构"><a href="#层次结构" class="headerlink" title="层次结构"></a><strong>层次结构</strong></h3><p>text</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Raw Flash<br>    ↓<br>MTD (Memory Technology Device) <br>    ↓  <br>UBI (Unsorted Block Images)<br>    ↓<br>UBIFS (File System)<br></code></pre></td></tr></table></figure></div><h2 id="处理UBIFS镜像的工具"><a href="#处理UBIFS镜像的工具" class="headerlink" title="处理UBIFS镜像的工具"></a>处理UBIFS镜像的工具</h2><h3 id="主要工具集"><a href="#主要工具集" class="headerlink" title="主要工具集"></a><strong>主要工具集</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># MTD工具<br>mtdinfo, flash_erase, nandwrite<br><br># UBI工具  <br>ubinize, ubiformat, ubiattach<br><br># UBIFS工具<br>mkfs.ubifs, ubirmvol, ubiupdatevol<br></code></pre></td></tr></table></figure></div><h2 id="镜像提取和分析步骤"><a href="#镜像提取和分析步骤" class="headerlink" title="镜像提取和分析步骤"></a>镜像提取和分析步骤</h2><h3 id="1-识别镜像类型"><a href="#1-识别镜像类型" class="headerlink" title="1. 识别镜像类型"></a><strong>1. 识别镜像类型</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 检查文件类型<br>file image.ubifs<br>hexdump -C image.ubifs | head -20<br><br># 查找UBI魔术字<br>grep -a &quot;UBI#&quot; image.ubifs<br></code></pre></td></tr></table></figure></div><h3 id="2-提取UBI卷"><a href="#2-提取UBI卷" class="headerlink" title="2. 提取UBI卷"></a><strong>2. 提取UBI卷</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 使用ubinfo查看镜像信息<br>ubinfo --image image.ubifs<br><br># 挂载UBIFS镜像<br>sudo modprobe nandsim first_id_byte=0xec second_id_byte=0xa1<br>sudo modprobe ubi mtd=0<br>sudo ubiformat /dev/mtd0 -f image.ubifs<br>sudo ubiattach /dev/ubi_ctrl -m 0<br>sudo mount -t ubifs ubi0:rootfs /mnt/ubifs<br></code></pre></td></tr></table></figure></div><h3 id="3-直接解析UBIFS（无需硬件）"><a href="#3-直接解析UBIFS（无需硬件）" class="headerlink" title="3. 直接解析UBIFS（无需硬件）"></a><strong>3. 直接解析UBIFS（无需硬件）</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 使用ubireader提取文件<br>ubireader_extract_files -i image.ubifs -o extracted_files/<br><br># 使用ubidump分析结构<br>ubidump image.ubifs<br></code></pre></td></tr></table></figure></div><h2 id="使用UBI工具处理"><a href="#使用UBI工具处理" class="headerlink" title="使用UBI工具处理"></a>使用UBI工具处理</h2><h3 id="创建UBI镜像"><a href="#创建UBI镜像" class="headerlink" title="创建UBI镜像"></a><strong>创建UBI镜像</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 从目录创建UBIFS镜像<br>mkfs.ubifs -r rootfs/ -m 2048 -e 126976 -c 1024 -o ubifs.img<br><br># 创建UBI镜像<br>ubinize -o image.ubifs -m 2048 -p 128KiB ubinize.cfg<br></code></pre></td></tr></table></figure></div><h3 id="ubinize配置文件示例"><a href="#ubinize配置文件示例" class="headerlink" title="ubinize配置文件示例"></a><strong>ubinize配置文件示例</strong></h3><p>ini</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[ubifs]<br>mode=ubi<br>image=ubifs.img<br>vol_id=0<br>vol_size=100MiB<br>vol_type=dynamic<br>vol_name=rootfs<br>vol_flags=autoresize<br></code></pre></td></tr></table></figure></div><h2 id="编程方式处理UBIFS"><a href="#编程方式处理UBIFS" class="headerlink" title="编程方式处理UBIFS"></a>编程方式处理UBIFS</h2><h3 id="Python处理示例"><a href="#Python处理示例" class="headerlink" title="Python处理示例"></a><strong>Python处理示例</strong></h3><p>python</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">import subprocess<br>import os<br><br>def extract_ubifs(image_path, output_dir):<br>    &quot;&quot;&quot;提取UBIFS镜像内容&quot;&quot;&quot;<br>    if not os.path.exists(output_dir):<br>        os.makedirs(output_dir)<br>    <br>    # 使用ubireader_extract_files<br>    cmd = [&#x27;ubireader_extract_files&#x27;, &#x27;-i&#x27;, image_path, &#x27;-o&#x27;, output_dir]<br>    result = subprocess.run(cmd, capture_output=True, text=True)<br>    <br>    if result.returncode == 0:<br>        print(&quot;UBIFS镜像提取成功&quot;)<br>        return True<br>    else:<br>        print(f&quot;提取失败: &#123;result.stderr&#125;&quot;)<br>        return False<br><br>def analyze_ubifs_structure(image_path):<br>    &quot;&quot;&quot;分析UBIFS结构&quot;&quot;&quot;<br>    # 读取魔术字和基本信息<br>    with open(image_path, &#x27;rb&#x27;) as f:<br>        header = f.read(64)<br>        <br>    print(&quot;镜像头部信息:&quot;)<br>    print(f&quot;魔术字: &#123;header[:4]&#125;&quot;)<br>    print(f&quot;版本: &#123;header[4:8]&#125;&quot;)<br>    print(f&quot;数据偏移: &#123;int.from_bytes(header[8:12], &#x27;little&#x27;)&#125;&quot;)<br></code></pre></td></tr></table></figure></div><h3 id="解析UBI头信息"><a href="#解析UBI头信息" class="headerlink" title="解析UBI头信息"></a><strong>解析UBI头信息</strong></h3><p>python</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">import struct<br><br>def parse_ubi_ec_hdr(data):<br>    &quot;&quot;&quot;解析UBI EC头&quot;&quot;&quot;<br>    magic = data[0:4]<br>    version = data[4:8]<br>    ec = struct.unpack(&#x27;&lt;I&#x27;, data[8:12])[0]  # 擦除计数器<br>    vid_hdr_offset = struct.unpack(&#x27;&lt;I&#x27;, data[12:16])[0]<br>    data_offset = struct.unpack(&#x27;&lt;I&#x27;, data[16:20])[0]<br>    <br>    return &#123;<br>        &#x27;magic&#x27;: magic,<br>        &#x27;version&#x27;: version,<br>        &#x27;erase_counter&#x27;: ec,<br>        &#x27;vid_hdr_offset&#x27;: vid_hdr_offset,<br>        &#x27;data_offset&#x27;: data_offset<br>    &#125;<br></code></pre></td></tr></table></figure></div><h2 id="在数字取证中的应用"><a href="#在数字取证中的应用" class="headerlink" title="在数字取证中的应用"></a>在数字取证中的应用</h2><h3 id="取证分析步骤"><a href="#取证分析步骤" class="headerlink" title="取证分析步骤"></a><strong>取证分析步骤</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 1. 创建镜像副本<br>dd if=/dev/mtd0 of=flash_dump.bin bs=1M<br><br># 2. 分析MTD分区<br>mtdinfo flash_dump.bin<br><br># 3. 提取UBIFS内容<br>ubireader_extract_images -i flash_dump.bin -o extracted_volumes/<br><br># 4. 文件系统分析<br>ls -la extracted_volumes/<br>find extracted_volumes/ -name &quot;*.conf&quot; -o -name &quot;*.sh&quot;<br></code></pre></td></tr></table></figure></div><h3 id="重要数据位置"><a href="#重要数据位置" class="headerlink" title="重要数据位置"></a><strong>重要数据位置</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 配置文件<br>/etc/passwd<br>/etc/shadow<br>/etc/network/interfaces<br><br># 日志文件<br>/var/log/messages<br>/var/log/auth.log<br><br># 用户数据<br>/home/<br>/root/<br>/tmp/<br></code></pre></td></tr></table></figure></div><h2 id="常见问题解决"><a href="#常见问题解决" class="headerlink" title="常见问题解决"></a>常见问题解决</h2><h3 id="1-挂载失败"><a href="#1-挂载失败" class="headerlink" title="1. 挂载失败"></a><strong>1. 挂载失败</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 错误: UBI device 0 not found<br>sudo modprobe ubi<br>sudo ubiattach /dev/ubi_ctrl -m 0 -d 0<br><br># 错误: Invalid argument<br># 检查PEB大小是否匹配<br>ubinfo --image image.ubifs<br></code></pre></td></tr></table></figure></div><h3 id="2-镜像损坏"><a href="#2-镜像损坏" class="headerlink" title="2. 镜像损坏"></a><strong>2. 镜像损坏</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 尝试修复<br>ubirepair image.ubifs<br><br># 强制挂载<br>sudo ubiformat /dev/mtd0 -f image.ubifs -s 2048<br></code></pre></td></tr></table></figure></div><h2 id="高级分析技巧"><a href="#高级分析技巧" class="headerlink" title="高级分析技巧"></a>高级分析技巧</h2><h3 id="恢复删除文件"><a href="#恢复删除文件" class="headerlink" title="恢复删除文件"></a><strong>恢复删除文件</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># UBIFS删除文件恢复较难，但可以尝试：<br># 1. 扫描原始镜像字符串<br>strings flash_dump.bin | grep -i &quot;password&quot;<br><br># 2. 分析未分配擦除块<br>ubireader_display -i image.ubifs<br></code></pre></td></tr></table></figure></div><h3 id="时间线分析"><a href="#时间线分析" class="headerlink" title="时间线分析"></a><strong>时间线分析</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 提取文件时间信息<br>find extracted_volumes/ -type f -exec stat &#123;&#125; \; &gt; timeline.txt<br><br># 分析修改时间<br>cat timeline.txt | grep &quot;Modify&quot;<br></code></pre></td></tr></table></figure></div><h2 id="实际案例"><a href="#实际案例" class="headerlink" title="实际案例"></a>实际案例</h2><h3 id="路由器固件分析"><a href="#路由器固件分析" class="headerlink" title="路由器固件分析"></a><strong>路由器固件分析</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 下载路由器固件<br>wget http://example.com/firmware.bin<br><br># 提取UBIFS分区<br>binwalk -e firmware.bin<br><br># 分析提取的文件<br>cd _firmware.bin.extracted/<br>ubireader_extract_files -i *.ubifs -o router_fs/<br></code></pre></td></tr></table></figure></div><h3 id="嵌入式设备取证"><a href="#嵌入式设备取证" class="headerlink" title="嵌入式设备取证"></a><strong>嵌入式设备取证</strong></h3><p>python</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs plaintext"># 自动化分析脚本<br>import os<br>import hashlib<br><br>def analyze_embedded_device(image_path):<br>    &quot;&quot;&quot;分析嵌入式设备镜像&quot;&quot;&quot;<br>    print(&quot;=== UBIFS镜像分析报告 ===&quot;)<br>    <br>    # 1. 基本信息<br>    size = os.path.getsize(image_path)<br>    print(f&quot;镜像大小: &#123;size&#125; bytes&quot;)<br>    <br>    # 2. 提取文件<br>    extract_dir = &quot;extracted_fs&quot;<br>    if extract_ubifs(image_path, extract_dir):<br>        # 3. 分析提取的文件<br>        for root, dirs, files in os.walk(extract_dir):<br>            for file in files:<br>                filepath = os.path.join(root, file)<br>                print(f&quot;找到文件: &#123;filepath&#125;&quot;)<br></code></pre></td></tr></table></figure></div><h2 id="工具安装"><a href="#工具安装" class="headerlink" title="工具安装"></a>工具安装</h2><h3 id="Ubuntu-Debian"><a href="#Ubuntu-Debian" class="headerlink" title="Ubuntu&#x2F;Debian"></a><strong>Ubuntu&#x2F;Debian</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo apt update<br>sudo apt install mtd-utils ubi-utils binwalk<br></code></pre></td></tr></table></figure></div><h3 id="CentOS-RHEL"><a href="#CentOS-RHEL" class="headerlink" title="CentOS&#x2F;RHEL"></a><strong>CentOS&#x2F;RHEL</strong></h3><p>bash</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo yum install mtd-utils<br># 需要从源码编译ubi-utils<br>git clone https://github.com/oberhumer/ubi-utils<br>cd ubi-utils &amp;&amp; make<br></code></pre></td></tr></table></figure></div><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><strong>UBIFS镜像分析关键点</strong>：</p><p><strong>使用正确的工具链</strong>（mtd-utils, ubi-utils）<br><strong>解层次结构</strong>（MTD→UBI→UBIFS）<br><strong>注意参数匹配</strong>（PEB大小、块大小）</p><p><strong>备份原始镜像</strong>再进行操作</p><p>使用ubi_reader（推荐）<br>bash</p><h3 id="安装ubi-reader"><a href="#安装ubi-reader" class="headerlink" title="安装ubi_reader"></a>安装ubi_reader</h3><p>sudo apt install python3-pip<br>pip3 install ubi_reader</p><h3 id="提取UBI卷信息"><a href="#提取UBI卷信息" class="headerlink" title="提取UBI卷信息"></a>提取UBI卷信息</h3><p>ubinfo –image firmware.ubifs</p><h3 id="显示详细结构"><a href="#显示详细结构" class="headerlink" title="显示详细结构"></a>显示详细结构</h3><p>ubireader_display -i firmware.ubifs</p><h3 id="提取所有文件"><a href="#提取所有文件" class="headerlink" title="提取所有文件"></a>提取所有文件</h3><p>ubireader_extract_files -i firmware.ubifs -o extracted_fs&#x2F;</p>]]></content>
     
     
+      
+      
     <summary type="html">&lt;p&gt;&lt;strong&gt;UBIFS&lt;/strong&gt;（Unsorted Block Image File System）是针对闪存设备设计的文件系统。我详细介绍一下UBIFS镜像的处理和分析：&lt;/p&gt;
-&lt;h2 id=&quot;UBIFS-概述&quot;&gt;&lt;a href=&quot;#UBIFS-概述&quot; class=&quot;headerlink&quot; title=&quot;UBIFS 概述&quot;&gt;&lt;/a&gt;UBIFS 概述&lt;/h2&gt;&lt;h3 id=&quot;特点&quot;&gt;&lt;a href=&quot;#特点&quot; class=&quot;headerlink&quot; title=&quot;特点&quot;&gt;&lt;/a&gt;&lt;strong&gt;特点&lt;/strong&gt;&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;专为&lt;strong&gt;原始闪存设备&lt;/strong&gt;设计&lt;/li&gt;
-&lt;li&gt;支持&lt;strong&gt;磨损均衡&lt;/strong&gt;、&lt;strong&gt;坏块管理&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;提供&lt;strong&gt;数据压缩&lt;/strong&gt;、&lt;strong&gt;数据完整性&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;用于嵌入式Linux系统&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;UBIFS镜像结构&quot;&gt;&lt;a href=&quot;#UBIFS镜像结构&quot; class=&quot;headerlink&quot; title=&quot;UBIFS镜像结构&quot;&gt;&lt;/a&gt;UBIFS镜像结构&lt;/h2&gt;&lt;h3 id=&quot;镜像组成&quot;&gt;&lt;a href=&quot;#镜像组成&quot; class=&quot;headerlink&quot; title=&quot;镜像组成&quot;&gt;&lt;/a&gt;&lt;strong&gt;镜像组成&lt;/strong&gt;&lt;/h3&gt;&lt;p&gt;text&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;UBIFS镜像 → UBI卷 → UBIFS文件系统&lt;br&gt;    ↓           ↓           ↓&lt;br&gt;  .ubif文件  包含多个  实际文件系统&lt;br&gt;             物理擦除块&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-
-
-
-&lt;h3 id=&quot;层次结构&quot;&gt;&lt;a href=&quot;#层次结构&quot; class=&quot;headerlink&quot; title=&quot;层次结构&quot;&gt;&lt;/a&gt;&lt;strong&gt;层次结构&lt;/strong&gt;&lt;/h3&gt;&lt;p&gt;text&lt;/p&gt;</summary>
+&lt;h2 id=&quot;UBIFS-概述&quot;&gt;&lt;a href=&quot;#UBIFS-概述&quot; cl</summary>
+      
     
     
     
@@ -883,15 +320,10 @@
     <content type="html"><![CDATA[<h1 id="DNS-Courier"><a href="#DNS-Courier" class="headerlink" title="DNS Courier"></a><em><strong>DNS Courier</strong></em></h1><p><em>&lt;from NSSCTF（CTF）&gt;</em>  </p><p>发现访问了多次奇怪的域名请求。</p><p>过滤这类请求（自行想办法过滤）</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163147555.png" alt="img"></p><p>然后将这类流量包提取打包成另一个pcapng文件（如果嫌原来的流量包分析起来慢的话）</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163224605.png" alt="img"></p><p>可以发现按时间顺序排序的第一个域名请求包含504B0304，那么可以联想到作者将压缩包元数据作为域名请求了。</p><p>然后我们自然而然想到提取这些数据还原压缩包。</p><p>但是这里足足有20万条流量包，也就是最少需要20万行的批处理，这里有人说用代码跑，但是并不建议，我们先提取数据。</p><p>因为已经过滤出了含有这些元数据的流量包，我们可以全选**（CTRL+A）**，进行提取。</p><p>然后按图示操作复制为文本。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163245257.png" alt="img"></p><p>以下就是得到的数据了，但是该怎么处理呢。</p><p>我试过了很多种编辑器，VSC，Sub，notepad++（但是都由于选中数量有限，同时行不对齐而加剧了更多的工作量）。。。。。最后我决定用010editor进行对数据的整理和提取。以下是我用010editor进行数据整理提取的过程。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163309208.png" alt="img"></p><p>OK足足有20多万行🙌</p><p>我们进行处理，这里010editor的方便之处就在于其可以对任意区的数据进行选中(删除。。。）操作。图示：</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163333037.png" alt="img"></p><p>按住CRTL然后拖动鼠标进行选中特定区域，当然这里的数据不止需要选中这一点（这里只做演示），实际处理后的数据应该是这样。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163358305.png" alt="img"></p><p>全选复制后可以重新新建一个空白页。</p><p>注意：这里是CTRL+SHIFT+V进行粘贴才会作为16进制数&#x3D;数据被存储在左侧16进制数据段。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163418753.png" alt="img"></p><p>点击HEX，就可以看到。然后再保存为zip文件即可。发现是一个加密的压缩包。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163440439.png" alt="img"></p><p>接下来就到了吃💩环节,首先,这是一个明文攻击没问题,但不是png作为明文文件,而是pdf,有可能有人会想到未明文攻击,用bkcrack去爆破.</p><p>但最后还是爆破不出来.</p><p>我们一直有个疑惑:之前提取的压缩包元数据的整合,最后一行并没有用到,谁能想到那是pdf文件md5值.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163829146.png" alt="img"></p><p>正确思路是根据md5值通过搜索引擎找到原文件…….</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126162154194.png" alt="img"></p><p>这里我访问的第一个平台网址来查询md5</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126162156690.png" alt="img"></p><p>发现和加密压缩包中的一致.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126162158695.png" alt="img"><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126162159942.png" alt="img"></p><p>最后还是GOOGLE搜索引擎才拿到了md5一致的原文件.</p><p>之后就是熟悉的配方熟悉的味道了.</p><p>原文件压缩成压缩包进行明文攻击.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126162245302.png" alt="img"></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126162242230.png" alt="img"></p><p>然后我们得到明文攻击后的加密压缩包的密码</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126162246964.png" alt="img"></p><p>然后是得到了一个二维码图片.</p><p>用这个网站工具:<a class="link" href="https://merri.cx/qrazybox/">QRazyBox - QR Code Analysis and Recovery Toolkit<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126162310033.png" alt="img"></p><p>进行操作,具体功能ai获取</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126162249602.png" alt="img"></p><p>extract一下得到flag.    <em><strong>OVER</strong></em></p><p>(●’◡’●)</p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;DNS-Courier&quot;&gt;&lt;a href=&quot;#DNS-Courier&quot; class=&quot;headerlink&quot; title=&quot;DNS Courier&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;DNS Courier&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&amp;lt;from NSSCTF（CTF）&amp;gt;&lt;/em&gt;  &lt;/p&gt;
-&lt;p&gt;发现访问了多次奇怪的域名请求。&lt;/p&gt;
-&lt;p&gt;过滤这类请求（自行想办法过滤）&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163147555.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;然后将这类流量包提取打包成另一个pcapng文件（如果嫌原来的流量包分析起来慢的话）&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126163224605.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;可以发现按时间顺序排序的第一个域名请求包含504B0304，那么可以联想到作者将压缩包元数据作为域名请求了。&lt;/p&gt;
-&lt;p&gt;然后我们自然而然想到提取这些数据还原压缩包。&lt;/p&gt;
-&lt;p&gt;但是这里足足有20万条流量包，也就是最少需要20万行的批处理，这里有人说用代码跑，但是并不建议，我们先提取数据。&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;DNS-Courier&quot;&gt;&lt;a href=&quot;#DNS-Courier&quot; class=&quot;headerlink&quot; title=&quot;DNS Courier&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;DNS Courier&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&amp;lt;</summary>
+      
     
     
     
@@ -912,15 +344,10 @@
     <content type="html"><![CDATA[<h1 id="Arrdeepee"><a href="#Arrdeepee" class="headerlink" title="Arrdeepee"></a><em><strong>Arrdeepee</strong></em></h1><p><em><from gfsj></from></em></p><p>题目描述:</p><p>我们某一个box被pwn了。在检查过程中，我们发现了一个叫mimikatz的东西，我们以前没有安装过，所以我们清除了，并且重新安装了box。但是，我们忘记备份我们的flag文件了。幸运的是，我们有一个攻击者网络流量捕获。你可以帮我们恢复出flag文件吗？</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126141149861.png" alt="img"></p><p>流量分析,废话不多说,直接开始.</p><p>发现大量tls,同时还有较为罕见的rdp流量,没接触过,试试.</p><p>我们知道rdp流量中 <strong>TPKT 是 RDP 的传输封装层</strong>,同时默认端口：<strong>TCP 3389</strong>, 这种情况下如果没有TPKT流量,就需要wireshark对协议进行解析:</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126145516901.png" alt="img"></p><p>将从59921端口发往3389端口的TCP协议解析为TPKT协议,就可以看到了.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126140244616.png" alt="img"></p><p>那这时我们看一下比较有嫌疑的RDP流量,发现其被TLS加密了,这时我们的目的就变成了寻找key.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126151315370.png" alt="img"></p><p>那么key就大概率出现在UDP流量包中了,根据协议分级统计,发现UDP占比还是很高的.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126151442300.png" alt="img"></p><p>我们追踪一下UDP的流量包.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126151518276.png" alt="img"></p><p>大致看一下,发现并不是常见文件,但是仔细观察不难发现tss,key等字样,查阅资料:</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">TSSEcKeySet10<br></code></pre></td></tr></table></figure></div><p>TSSE &#x3D; Terminal Services Security<br> EcKeySet10 &#x3D; KeySet 标识<br> → <strong>CredSSP &#x2F; RDP 安全握手数据</strong></p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Microsoft Strong Cryptographic Provider<br></code></pre></td></tr></table></figure></div><p>这段 hex 属于 <strong>CredSSP &#x2F; NTLM &#x2F; TLS over RDP</strong> 流量中的 <strong>ASN.1 编码结构</strong>，常见于：</p><h6 id="✔-RDP-握手"><a href="#✔-RDP-握手" class="headerlink" title="✔ RDP 握手"></a>✔ RDP 握手</h6><h6 id="✔-NTLMSSP-AUTH"><a href="#✔-NTLMSSP-AUTH" class="headerlink" title="✔ NTLMSSP AUTH"></a>✔ NTLMSSP AUTH</h6><h6 id="✔-公钥传递（Public-Key-Authentication）"><a href="#✔-公钥传递（Public-Key-Authentication）" class="headerlink" title="✔ 公钥传递（Public Key Authentication）"></a>✔ 公钥传递（Public Key Authentication）</h6><h6 id="✔-加密提供程序标识（Crypto-Provider-Name）"><a href="#✔-加密提供程序标识（Crypto-Provider-Name）" class="headerlink" title="✔ 加密提供程序标识（Crypto Provider Name）"></a>✔ 加密提供程序标识（Crypto Provider Name）</h6><p>特别是：</p><ul><li><p><code>Microsoft Strong Cryptographic Provider</code> → Windows 默认加密提供器名称</p></li><li><p><code>TSSEcKeySet10</code> → RDP&#x2F;CredSSP 密钥交换结构</p><p>总的来说, 这无疑就是我们需要寻找的关键key所在文件.</p></li></ul><p>将这段数据完整dump下来.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126152301513.png" alt="img"></p><p>进一步分析,首先丢进随波逐流里看看.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126152428856.png" alt="img"></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126153708468.png" alt="img"></p><p>1: Certificate in DER format (x509 v3), header length: 4, sequence length: 2376<br>2: Certificate in DER format (x509 v3), header length: 4, sequence length: 1466<br>3: Private key in DER format (PKCS header length: 4, sequence length: 860)</p><p>✔ Binwalk 检测到：<br>项类型格式长度说明<br>1证书X.509 v3 DERSequence 2376 bytes<br>2证书X.509 v3 DERSequence 1466 bytes<br>3私钥Private Key (PKCS#1 &#x2F; PKCS#8) DERSequence 860 bytes</p><p>也就是说，文件里包含：</p><p>🟦 两份证书（很可能是：服务器证书中间证书 or 客户端证书）       🟥 一份私钥</p><p>那么显然我们需要将私钥提取,接下来开始提取工作.</p><p>这里我们用openssl进行解密提取,</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126152913220.png" alt="img"></p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">openssl pkcs12 -in data.bin -nocerts -nodes -out private.key<br></code></pre></td></tr></table></figure></div><p>OpenSSL 提示：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Enter Import Password:<br></code></pre></td></tr></table></figure></div><p>这里的密码说是题目描述中的mimikatz,输入之后即可拿到私钥文件.  (关于mimikatz会有另一文章介绍).</p><p>私钥文件内容:</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126153803695.png" alt="img"></p><p>很明显是RSA私钥的标准格式.</p><p>我们进行私钥解密加密流量协议.</p><p>我这里直接用命令行对第七层进行解密出的.</p><p><code>tshark -r &quot;rdp.pcap&quot; -d &quot;tcp.port==3389,tls&quot; -o &quot;tls.keys_list:0.0.0.0,0,tpkt,private.key&quot; -o &quot;tpkt.tcp.port:3389&quot; -U &quot;OSI layer 7&quot; -F &quot;pcap&quot; -w &quot;rdp_dec.pcap&quot;</code></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126154824142.png" alt="img"></p><p>解密成功!这里就可以看到大量RDP流了.</p><p>之后的步骤我也没见过,总的就是重放一下中间人攻击,因为官方用的工具十年前的版本,无人问津了,包括会出现各种兼容性,库等等问题,所以这里求助大佬得知了一个工具——pyrdp</p><p>具体想了解使用教程和原理的可以看看这个老外的一个教程:</p><p><a class="link" href="https://www.youtube.com/watch?v=cSJ4-gXiNv4&t=29s">PyRDP: Remote Desktop Protocol MITM for Purple Teamers - Black Hat Arsenal 2022<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></p><p>接下来我们看一下我们的题目,即使是pyrdp这个工具在没有具体的教程的情况还是非常的难用.</p><p>我们进行简单的一个命令对解密的流量包文件进行验证,如果没有解密成功就会报错unknown tls.</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">pyrdp-convert rdp_dec.pcap -o out <br></code></pre></td></tr></table></figure></div><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126155822236.png" alt="img"></p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">pyrdp-convert -f mp4 -o &quot;自定义输出路径&quot; &quot;解密的后的rdp流量包文件路径&quot;<br></code></pre></td></tr></table></figure></div><p>这里我当时不太会使用导致直接用pyrdp-convert命令进行对rdp还原为mp4文件,但是仅仅还原视频文件没什么用,需要视频中的输入信息(即剪切板信息).</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126160120503.png" alt="img"></p><p>但是由于pyrdp的限制, pyrdp-player(可以UI图形化) 重放文件时,文件格式必须为pyrdp(如果不转换直接用player进行重放会出现内存报错),但是在转换时老是报错,无奈我这里只能使用mcp(trae)进行了对工具源码进行篡改(似乎也增添了一个扩展),使其可以被自动转换为pyrdp文件进行重放.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161206779.png" alt="img"></p><p>可以看到转换成功,所以说在功能性的开发上,mcp还是具有很大的优势和解决问题的能力的.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161515026.png" alt="img"></p><p>这样的话就轻松多了,整个过程最复杂头疼的还是这个工具.</p><p>之后就是一个base64加密了一个加密压缩包的元数据,逆向解密一下就行了,base64编码和压缩包密码都在剪切板的信息里了.</p><p>接下来就一路到底拿到flag.</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161745356.png" alt="img"></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161749134.png" alt="img"><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161752629.png" alt="img"></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126161805329.png" alt="img"></p><p>○( ＾皿＾)っHiahiahia…</p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;Arrdeepee&quot;&gt;&lt;a href=&quot;#Arrdeepee&quot; class=&quot;headerlink&quot; title=&quot;Arrdeepee&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Arrdeepee&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from gfsj&gt;&lt;/from&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;题目描述:&lt;/p&gt;
-&lt;p&gt;我们某一个box被pwn了。在检查过程中，我们发现了一个叫mimikatz的东西，我们以前没有安装过，所以我们清除了，并且重新安装了box。但是，我们忘记备份我们的flag文件了。幸运的是，我们有一个攻击者网络流量捕获。你可以帮我们恢复出flag文件吗？&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126141149861.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;流量分析,废话不多说,直接开始.&lt;/p&gt;
-&lt;p&gt;发现大量tls,同时还有较为罕见的rdp流量,没接触过,试试.&lt;/p&gt;
-&lt;p&gt;我们知道rdp流量中 &lt;strong&gt;TPKT 是 RDP 的传输封装层&lt;/strong&gt;,同时默认端口：&lt;strong&gt;TCP 3389&lt;/strong&gt;, 这种情况下如果没有TPKT流量,就需要wireshark对协议进行解析:&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251126145516901.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;将从59921端口发往3389端口的TCP协议解析为TPKT协议,就可以看到了.&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Arrdeepee&quot;&gt;&lt;a href=&quot;#Arrdeepee&quot; class=&quot;headerlink&quot; title=&quot;Arrdeepee&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Arrdeepee&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from gfsj&gt;&lt;</summary>
+      
     
     
     
@@ -941,22 +368,10 @@
     <content type="html"><![CDATA[<h1 id="VMware-Linux命令窗口鼠标滑轮体验优化解决方案"><a href="#VMware-Linux命令窗口鼠标滑轮体验优化解决方案" class="headerlink" title="VMware Linux命令窗口鼠标滑轮体验优化解决方案"></a><em><strong>VMware Linux命令窗口鼠标滑轮体验优化解决方案</strong></em></h1><h3 id="为什么-VMware-下鼠标滚轮手感差"><a href="#为什么-VMware-下鼠标滚轮手感差" class="headerlink" title="为什么 VMware 下鼠标滚轮手感差"></a>为什么 VMware 下鼠标滚轮手感差</h3><ol><li><p><strong>虚拟机的输入延迟</strong>：<br> VMware 把宿主机的鼠标输入“翻译”成虚拟信号发送到客机，滚轮事件分辨率很低（一次滚动往往是好几行）。</p></li><li><p><strong>libinput 默认步长过大</strong>：<br> Linux 桌面默认按“行”滚动，而不是“像素滚动”，导致特别跳。</p></li><li><p><strong>没有加速度补偿</strong>：<br> 虚拟设备（如 <code>VirtualPS/2 VMMouse</code>）通常不支持高精度滚动（不像真实 USB 鼠标那样有分级信号）。</p></li></ol><h4 id="启用平滑滚动（针对-GNOME-libinput）"><a href="#启用平滑滚动（针对-GNOME-libinput）" class="headerlink" title="启用平滑滚动（针对 GNOME &#x2F; libinput）"></a><strong><em>启用平滑滚动</em>（针对 GNOME &#x2F; libinput）</strong></h4><p>在命令行执行：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo nano /etc/libinput/local-overrides.quirks<br></code></pre></td></tr></table></figure></div><p>添加以下内容：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[VMware Virtual Mouse]<br>MatchName=VMware VMware Virtual USB Mouse<br>AttrScrollMethod=button<br>AttrScrollPoints=1<br></code></pre></td></tr></table></figure></div><p>然后重启或运行：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo udevadm control --reload-rules &amp;&amp; sudo udevadm trigger<br></code></pre></td></tr></table></figure></div><p>若出现报错</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251109222353816.png" alt="img"></p><p>这个提示说明：</p><blockquote><p>你的系统里还没有 <code>/etc/libinput/</code> 这个目录。</p></blockquote><p>不同的 Linux 发行版（特别是在虚拟机中）默认并不会创建这个文件夹。<br> 解决很简单：</p><hr><h3 id="方法-：先创建目录"><a href="#方法-：先创建目录" class="headerlink" title="方法 ：先创建目录"></a>方法 ：先创建目录</h3><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo mkdir -p /etc/libinput<br></code></pre></td></tr></table></figure></div><p>然后再执行：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo nano /etc/libinput/local-overrides.quirks<br></code></pre></td></tr></table></figure></div><p>粘贴进去：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">[VMware Virtual Mouse]          <br>MatchName=VMware VMware Virtual USB Mouse   //“设备匹配规则”—— 指定这份配置只对 “名称为 VMware 虚拟 USB 鼠标” 的设备生效<br>AttrScrollMethod=button                     //设置滚动方式为 “按钮模拟滚动”—— 把鼠标滚轮的 “行级触发”（默认一次滚多行）分成 “像素级触发”，是实现 “平滑滚动” 的核心；<br>AttrScrollPoints=1                          //设置最小滚动步长为 1 个单位（接近像素级）—— 解决默认 “一次滚多行” 的跳变问题，让滚动更细腻。<br></code></pre></td></tr></table></figure></div><p>保存（<code>Ctrl+O</code> → 回车 → <code>Ctrl+X</code> 退出），<br> 再执行：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo udevadm control --reload-rules &amp;&amp; sudo udevadm trigger    //udevadm 是 Linux 管理设备规则的工具<br>                                                               //重新加载系统的设备规则（修改配置文件后，必须重载才能让 系统识别新规则）<br>                                                               //触发设备规则生效（相当于 “刷新” 所有设备，让新配置立即<br>应用到虚拟鼠标上）。<br></code></pre></td></tr></table></figure></div><p>重启后生效。</p><h3 id="使用-imwheel-设置滚轮加速"><a href="#使用-imwheel-设置滚轮加速" class="headerlink" title="使用 imwheel 设置滚轮加速"></a><em><strong>使用 <code>imwheel</code> 设置滚轮加速</strong></em></h3><p>既然你已经有平滑滚动，可以让 <code>imwheel</code> 帮你加速快速滚动：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">sudo apt install imwheel -y<br></code></pre></td></tr></table></figure></div><p>然后创建配置：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">nano ~/.imwheelrc             //  ~：代表当前用户的主目录（比如你的用户名是 user，路径就是 /home/user/）<br>                              //  .imwheelrc：imwheel 的配置文件（文件名前加 . 表示 “隐藏文件”，专门存放个人的工具配置）<br></code></pre></td></tr></table></figure></div><p>内容如下 👇：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">&quot;.*&quot;<br>None,      Up,   Button4, 5<br>None,      Down, Button5, 5<br>Control_L, Up,   Button4, 10<br>Control_L, Down, Button5, 10<br>Shift_L,   Up,   Button4, 2<br>Shift_L,   Down, Button5, 2<br></code></pre></td></tr></table></figure></div><table><thead><tr><th align="center">配置行</th><th align="center">辅助键</th><th align="center">滚轮方向</th><th align="center">鼠标按键</th><th align="center">滚动倍率</th><th align="center">实际效果（通俗理解）</th></tr></thead><tbody><tr><td align="center"><code>None, Up, Button4, 5</code></td><td align="center">None（无按键）</td><td align="center">Up（上滚）</td><td align="center">Button4</td><td align="center">5</td><td align="center">日常默认滚动：滚一下相当于原来的 5 倍速度（平衡平滑与效率）</td></tr><tr><td align="center"><code>None, Down, Button5, 5</code></td><td align="center">None（无按键）</td><td align="center">Down（下滚）</td><td align="center">Button5</td><td align="center">5</td><td align="center">同上，下滚的默认加速</td></tr><tr><td align="center"><code>Control_L, Up, Button4, 10</code></td><td align="center">Control_L（左 Ctrl 键）</td><td align="center">Up（上滚）</td><td align="center">Button4</td><td align="center">10</td><td align="center">按住 Ctrl + 上滚：快速滚动（适合长文档 &#x2F; 网页）</td></tr><tr><td align="center"><code>Control_L, Down, Button5, 10</code></td><td align="center">Control_L（左 Ctrl 键）</td><td align="center">Down（下滚）</td><td align="center">Button5</td><td align="center">10</td><td align="center">按住 Ctrl + 下滚：快速下滚</td></tr><tr><td align="center"><code>Shift_L, Up, Button4, 2</code></td><td align="center">Shift_L（左 Shift 键）</td><td align="center">Up（上滚）</td><td align="center">Button4</td><td align="center">2</td><td align="center">按住 Shift + 上滚：精细滚动（适合代码 &#x2F; 表格对齐）</td></tr><tr><td align="center"><code>Shift_L, Down, Button5, 2</code></td><td align="center">Shift_L（左 Shift 键）</td><td align="center">Down（下滚）</td><td align="center">Button5</td><td align="center">2</td><td align="center">按住 Shift + 下滚：精细下滚</td></tr></tbody></table><p>保存退出后，运行：</p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">imwheel -kill<br></code></pre></td></tr></table></figure></div><p>你可以反复调最后那个数字（5）：</p><ul><li>越大 → 滚动速度更快（适合高分辨率屏幕）；</li><li>越小 → 更自然。</li></ul>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;VMware-Linux命令窗口鼠标滑轮体验优化解决方案&quot;&gt;&lt;a href=&quot;#VMware-Linux命令窗口鼠标滑轮体验优化解决方案&quot; class=&quot;headerlink&quot; title=&quot;VMware Linux命令窗口鼠标滑轮体验优化解决方案&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;VMware Linux命令窗口鼠标滑轮体验优化解决方案&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;h3 id=&quot;为什么-VMware-下鼠标滚轮手感差&quot;&gt;&lt;a href=&quot;#为什么-VMware-下鼠标滚轮手感差&quot; class=&quot;headerlink&quot; title=&quot;为什么 VMware 下鼠标滚轮手感差&quot;&gt;&lt;/a&gt;为什么 VMware 下鼠标滚轮手感差&lt;/h3&gt;&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;虚拟机的输入延迟&lt;/strong&gt;：&lt;br&gt; VMware 把宿主机的鼠标输入“翻译”成虚拟信号发送到客机，滚轮事件分辨率很低（一次滚动往往是好几行）。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;libinput 默认步长过大&lt;/strong&gt;：&lt;br&gt; Linux 桌面默认按“行”滚动，而不是“像素滚动”，导致特别跳。&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;&lt;strong&gt;没有加速度补偿&lt;/strong&gt;：&lt;br&gt; 虚拟设备（如 &lt;code&gt;VirtualPS/2 VMMouse&lt;/code&gt;）通常不支持高精度滚动（不像真实 USB 鼠标那样有分级信号）。&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h4 id=&quot;启用平滑滚动（针对-GNOME-libinput）&quot;&gt;&lt;a href=&quot;#启用平滑滚动（针对-GNOME-libinput）&quot; class=&quot;headerlink&quot; title=&quot;启用平滑滚动（针对 GNOME &amp;#x2F; libinput）&quot;&gt;&lt;/a&gt;&lt;strong&gt;&lt;em&gt;启用平滑滚动&lt;/em&gt;（针对 GNOME &amp;#x2F; libinput）&lt;/strong&gt;&lt;/h4&gt;&lt;p&gt;在命令行执行：&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;sudo nano /etc/libinput/local-overrides.quirks&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-
-&lt;p&gt;添加以下内容：&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;[VMware Virtual Mouse]&lt;br&gt;MatchName=VMware VMware Virtual USB Mouse&lt;br&gt;AttrScrollMethod=button&lt;br&gt;AttrScrollPoints=1&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-
-&lt;p&gt;然后重启或运行：&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;sudo udevadm control --reload-rules &amp;amp;&amp;amp; sudo udevadm trigger&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;VMware-Linux命令窗口鼠标滑轮体验优化解决方案&quot;&gt;&lt;a href=&quot;#VMware-Linux命令窗口鼠标滑轮体验优化解决方案&quot; class=&quot;headerlink&quot; title=&quot;VMware Linux命令窗口鼠标滑轮体验优化解决方案&quot;&gt;&lt;/a&gt;&lt;e</summary>
+      
     
     
     
@@ -977,19 +392,10 @@
     <content type="html"><![CDATA[<h1 id="Block-chain-Signln"><a href="#Block-chain-Signln" class="headerlink" title="Block-chain  Signln"></a><em><strong>Block-chain  Signln</strong></em></h1><from geekchallenge><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163022356.png" alt="img"></p><p>题目给了我们区块hash，我们可以查询~<em><strong><a class="link" href="https://sepolia.etherscan.io/">TESTNET Sepolia (ETH) Blockchain Explorer<i class="fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon"></i></a></strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163110698.png" alt="img"></p><p>根据hash查询交易信息</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163114779.png" alt="img"></p><p>这里click to SHOW MORE</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163120495.png" alt="img"></p><p>发现一个INPUT DATA是hex转一下，得到flag。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163124653.png" alt="img"></p><p>☆<em>: .｡. o(≧▽≦)o .｡.:</em>☆《<del>☆</del>》<em>: .｡. o(≧▽≦)o .｡.:</em>☆ </p></from>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;Block-chain-Signln&quot;&gt;&lt;a href=&quot;#Block-chain-Signln&quot; class=&quot;headerlink&quot; title=&quot;Block-chain  Signln&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Block-chain  Signln&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;from geekchallenge&gt;
-
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163022356.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;题目给了我们区块hash，我们可以查询~&lt;em&gt;&lt;strong&gt;&lt;a class=&quot;link&quot; href=&quot;https://sepolia.etherscan.io/&quot;&gt;TESTNET Sepolia (ETH) Blockchain Explorer&lt;i class=&quot;fa-solid fa-arrow-up-right ml-[0.2em] font-light align-text-top text-[0.7em] link-icon&quot;&gt;&lt;/i&gt;&lt;/a&gt;&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163110698.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;根据hash查询交易信息&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163114779.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;这里click to SHOW MORE&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163120495.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;发现一个INPUT DATA是hex转一下，得到flag。&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251029163124653.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;☆&lt;em&gt;: .｡. o(≧▽≦)o .｡.:&lt;/em&gt;☆《&lt;del&gt;☆&lt;/del&gt;》&lt;em&gt;: .｡. o(≧▽≦)o .｡.:&lt;/em&gt;☆ &lt;/p&gt;
-&lt;/from&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;Block-chain-Signln&quot;&gt;&lt;a href=&quot;#Block-chain-Signln&quot; class=&quot;headerlink&quot; title=&quot;Block-chain  Signln&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;Block-chain  Signln</summary>
+      
     
     
     
@@ -1010,15 +416,10 @@
     <content type="html"><![CDATA[<h1 id="traffic-1"><a href="#traffic-1" class="headerlink" title="traffic 1"></a><em><strong>traffic 1</strong></em></h1><p><em><from gfsj_misc_traffic analysis></from></em></p><p>有tcp无http，怀疑tls</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103420190.png" alt="img"></p><p>过滤tls</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103424488.png" alt="img"></p><p>大量tlsv1.2协议。</p><p>发现Encrypt字段，怀疑解密。</p><p>搜索key没有发现，再看了看发现有ftp协议，看看什么模式。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png" alt="img"></p><p>不管了直接搜ftp-data协议（主动模式下无ftp-data数据包，被动模式有）</p><p>传输了大量key.log文件</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png" alt="img"></p><p>追踪流。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103432448.png" alt="img"></p><p>每一行都以 <code>CLIENT_RANDOM</code> 开头，后面跟着两个长串的十六进制字符串。这是典型的 <strong>TLS（传输层安全协议）密钥日志格式</strong>，用于解密  加密流量。</p><p>我们导出保存为key.log</p><p>之后对加密流量包解密。进入<em><strong>编辑 → 首选项 → 协议 → TLS</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103436331.png" alt="img"></p><p>点击应用完成解密。如果解密不成功可以试试把debug file添加上。</p><p>解密成功。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103439925.png" alt="img"></p><p>导出http。</p><p>文件有点多，我们可以选择可疑的导出。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103443960.png" alt="img"></p><p>这里有个zip导出一下。发现是一个音频。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103448382.png" alt="img"></p><p>尾部有噪音。Audacity打开。</p><p>频谱图看一下尾部。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103452336.png" alt="img"></p><p>发现是key不是flag，说明我们遗漏了什么东西。回头看看。</p><p>不管了，这里直接binwalk+foremost一下。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103457987.png" alt="img"></p><p>分理出2个压缩包。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103503383.png" alt="img"></p><p>输入刚才的key</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103507403.png" alt="img"></p><p>得到flag：<em><strong>flag{4sun0_y0zora_sh0ka1h@n_#&gt;&gt;&lt;&lt;#}</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103512520.png" alt="img"></p><p>○( ＾皿＾)っHiahiahia…</p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;traffic-1&quot;&gt;&lt;a href=&quot;#traffic-1&quot; class=&quot;headerlink&quot; title=&quot;traffic 1&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;traffic 1&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from gfsj_misc_traffic analysis&gt;&lt;/from&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;有tcp无http，怀疑tls&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103420190.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;过滤tls&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103424488.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;大量tlsv1.2协议。&lt;/p&gt;
-&lt;p&gt;发现Encrypt字段，怀疑解密。&lt;/p&gt;
-&lt;p&gt;搜索key没有发现，再看了看发现有ftp协议，看看什么模式。&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030103428217.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;traffic-1&quot;&gt;&lt;a href=&quot;#traffic-1&quot; class=&quot;headerlink&quot; title=&quot;traffic 1&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;traffic 1&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from gfsj_m</summary>
+      
     
     
     
@@ -1039,16 +440,10 @@
     <content type="html"><![CDATA[<h1 id="evil-mcp"><a href="#evil-mcp" class="headerlink" title="evil_mcp"></a><em><strong>evil_mcp</strong></em></h1><p><em><from geekchallenge></from></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105202206.png" alt="img"></p><p><strong>ez_AI</strong>：打开环境</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105205382.png" alt="img"></p><p><em>这里思路是编写一个脚本注入获取flag</em></p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">from typing import Any<br><br>@tool(<br>    name=&quot;get_flag&quot;,<br>    description=&quot;Get the flag from the server&quot;,<br>    input_schema=&#123;<br>        &quot;type&quot;: &quot;object&quot;,<br>        &quot;properties&quot;: &#123;&#125;,<br>        &quot;required&quot;: []<br>    &#125;<br>)<br>async def get_flag(arguments: dict[str, Any], context: Any) -&gt; Any:<br>    &quot;&quot;&quot;Get the flag.&quot;&quot;&quot;<br>    with open(&#x27;/flag&#x27;, &#x27;r&#x27;) as f:<br>        content = f.read()<br>    return content<br></code></pre></td></tr></table></figure></div><p>粘贴进MCP工具代码框，保存并加载工具。</p><p>最后get_flag就行。</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105210043.png" alt="img"></p><p>☆<em>: .｡. o(≧▽≦)o .｡.:</em>☆喔耶!</p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;evil-mcp&quot;&gt;&lt;a href=&quot;#evil-mcp&quot; class=&quot;headerlink&quot; title=&quot;evil_mcp&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;evil_mcp&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from geekchallenge&gt;&lt;/from&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105202206.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;ez_AI&lt;/strong&gt;：打开环境&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105205382.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;这里思路是编写一个脚本注入获取flag&lt;/em&gt;&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;from typing import Any&lt;br&gt;&lt;br&gt;@tool(&lt;br&gt;    name=&amp;quot;get_flag&amp;quot;,&lt;br&gt;    description=&amp;quot;Get the flag from the server&amp;quot;,&lt;br&gt;    input_schema=&amp;#123;&lt;br&gt;        &amp;quot;type&amp;quot;: &amp;quot;object&amp;quot;,&lt;br&gt;        &amp;quot;properties&amp;quot;: &amp;#123;&amp;#125;,&lt;br&gt;        &amp;quot;required&amp;quot;: []&lt;br&gt;    &amp;#125;&lt;br&gt;)&lt;br&gt;async def get_flag(arguments: dict[str, Any], context: Any) -&amp;gt; Any:&lt;br&gt;    &amp;quot;&amp;quot;&amp;quot;Get the flag.&amp;quot;&amp;quot;&amp;quot;&lt;br&gt;    with open(&amp;#x27;/flag&amp;#x27;, &amp;#x27;r&amp;#x27;) as f:&lt;br&gt;        content = f.read()&lt;br&gt;    return content&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-
-&lt;p&gt;粘贴进MCP工具代码框，保存并加载工具。&lt;/p&gt;
-&lt;p&gt;最后get_flag就行。&lt;/p&gt;
-&lt;p&gt;&lt;img lazyload src=&quot;/images/loading.svg&quot; data-src=&quot;https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030105210043.png&quot; alt=&quot;img&quot;&gt;&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;evil-mcp&quot;&gt;&lt;a href=&quot;#evil-mcp&quot; class=&quot;headerlink&quot; title=&quot;evil_mcp&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;evil_mcp&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;from geekchalle</summary>
+      
     
     
     
@@ -1069,18 +464,10 @@
     <content type="html"><![CDATA[<h1 id="ESP（扩展栈指针）"><a href="#ESP（扩展栈指针）" class="headerlink" title="ESP（扩展栈指针）"></a><em><strong>ESP（扩展栈指针）</strong></em></h1><p><em><strong>principle：</strong></em></p><p>*在程序执行过程中，栈的操作与函数调用、局部变量存储等密切相关。当程序执行到某个函数调用时，会将函数的参数、返回地址等信息压入栈中，而 ESP 则始终指向栈顶。*<em><strong>X86 exp寄存器存储的是当前栈顶的内存地址。</strong></em></p><p><em><strong>Function：</strong></em></p><p>ESP 定律的核心原理基于栈的平衡机制。在一些情况下，特别是在加密程序或存在代码保护机制的软件中，程序可能会对自身代码进行加密或混淆处理，使得直接分析原始代码变得困难。然而，<strong>当程序执行到特定关键代码段（如解密后的代码部分）时，通常会涉及到栈的操作，导致 ESP 的值发生有规律的变化</strong>。通过<strong>监测 ESP 的值变化，我们可以找到这些关键代码的执行点</strong>。</p><p><em><strong>CPP：</strong></em></p><div class="code-container" data-rel="Plaintext"><figure class="iseeu highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">`#include &lt;iostream&gt;`<br><br>`void encryptedFunction() &#123;`<br>`// 这里假设是一些加密后的代码逻辑`<br>`std::cout &lt;&lt; &quot;This is the encrypted part of the code.&quot; &lt;&lt; std::endl;`<br>`&#125;`<br><br>`int main() &#123;`<br>`// 调用加密函数前的栈状态`<br>`int localVar1 = 10;`<br>`int localVar2 = 20;`<br><br><br>encryptedFunction();<br><br>// 调用加密函数后的栈状态<br>std::cout &lt;&lt; &quot;After the function call, localVar1: &quot; &lt;&lt; localVar1 &lt;&lt; &quot;, localVar2: &quot; &lt;&lt; localVar2 &lt;&lt; std::endl;<br><br>return 0;<br><br>&#125;<br></code></pre></td></tr></table></figure></div><p><em><strong>个人理解（仅供参考）：</strong></em></p><p><em>ESP（扩展栈指针）</em>：对于调用函数等操作，在对关键代码进行定位查找的困难过程中，可以通过观察ESP的值进行对函数地址的定位，比如程序在调用<strong>encryptedFunction</strong>函数时，会涉及到栈的操作，导致 ESP 的值发生有规律的变化。通过监测 ESP 的值变化，我们可以找到这些关键代码的执行点。</p><p><em><strong>Example：</strong></em></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104434071.png" alt="img"></p><p><strong>我创建了一个简单的PE文件，并对其进行基础加壳upx -d  project1.exe</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104438830.png" alt="img"></p><p><strong>接着对upx特征段进行篡改使其无法被基础脱壳掉。如下图</strong>：</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104443152.png" alt="img"></p><p><strong>然后针对此类加壳我们可以用esp定律进行动态调试来完成脱壳。</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104446580.png" alt="img"></p><p>首先单步调试，发现ESP寄存器出大红（<strong>ESP 寄存器变红表示栈指针（Stack Pointer）的值发生了异常或不一致，可能触发了栈平衡错误。</strong>）</p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104449794.png" alt="img"></p><p><strong>将内存窗口的显示定位到与该寄存器值相关的内存地址处，方便查看对应内存地址中的数据。</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104453237.png" alt="img"></p><p><strong>任意字符下硬件断点</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104456305.png" alt="img"></p><p><strong>run to line(jmp project.6c1023)，找到[OEP]（ 程序的入口点 ）</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104459583.png" alt="img"></p><p><strong>设置EIP，收工。</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104503551.png" alt="img"></p><p><strong>最后dump下来，检验一下。</strong></p><p><img lazyload src="/images/loading.svg" data-src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20251030104507280.png" alt="img"></p><p><strong>脱壳成功！</strong>🙌🙌🙌</p>]]></content>
     
     
-    <summary type="html">&lt;h1 id=&quot;ESP（扩展栈指针）&quot;&gt;&lt;a href=&quot;#ESP（扩展栈指针）&quot; class=&quot;headerlink&quot; title=&quot;ESP（扩展栈指针）&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;ESP（扩展栈指针）&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;strong&gt;principle：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;*在程序执行过程中，栈的操作与函数调用、局部变量存储等密切相关。当程序执行到某个函数调用时，会将函数的参数、返回地址等信息压入栈中，而 ESP 则始终指向栈顶。*&lt;em&gt;&lt;strong&gt;X86 exp寄存器存储的是当前栈顶的内存地址。&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;&lt;strong&gt;Function：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;ESP 定律的核心原理基于栈的平衡机制。在一些情况下，特别是在加密程序或存在代码保护机制的软件中，程序可能会对自身代码进行加密或混淆处理，使得直接分析原始代码变得困难。然而，&lt;strong&gt;当程序执行到特定关键代码段（如解密后的代码部分）时，通常会涉及到栈的操作，导致 ESP 的值发生有规律的变化&lt;/strong&gt;。通过&lt;strong&gt;监测 ESP 的值变化，我们可以找到这些关键代码的执行点&lt;/strong&gt;。&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;&lt;strong&gt;CPP：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;div class=&quot;code-container&quot; data-rel=&quot;Plaintext&quot;&gt;&lt;figure class=&quot;iseeu highlight plaintext&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;13&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;14&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;15&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;16&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;17&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;18&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;19&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;20&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;21&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;code class=&quot;hljs plaintext&quot;&gt;`#include &amp;lt;iostream&amp;gt;`&lt;br&gt;&lt;br&gt;`void encryptedFunction() &amp;#123;`&lt;br&gt;`// 这里假设是一些加密后的代码逻辑`&lt;br&gt;`std::cout &amp;lt;&amp;lt; &amp;quot;This is the encrypted part of the code.&amp;quot; &amp;lt;&amp;lt; std::endl;`&lt;br&gt;`&amp;#125;`&lt;br&gt;&lt;br&gt;`int main() &amp;#123;`&lt;br&gt;`// 调用加密函数前的栈状态`&lt;br&gt;`int localVar1 = 10;`&lt;br&gt;`int localVar2 = 20;`&lt;br&gt;&lt;br&gt;&lt;br&gt;encryptedFunction();&lt;br&gt;&lt;br&gt;// 调用加密函数后的栈状态&lt;br&gt;std::cout &amp;lt;&amp;lt; &amp;quot;After the function call, localVar1: &amp;quot; &amp;lt;&amp;lt; localVar1 &amp;lt;&amp;lt; &amp;quot;, localVar2: &amp;quot; &amp;lt;&amp;lt; localVar2 &amp;lt;&amp;lt; std::endl;&lt;br&gt;&lt;br&gt;return 0;&lt;br&gt;&lt;br&gt;&amp;#125;&lt;br&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;&lt;/div&gt;
-
-
-
-&lt;p&gt;&lt;em&gt;&lt;strong&gt;个人理解（仅供参考）：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;ESP（扩展栈指针）&lt;/em&gt;：对于调用函数等操作，在对关键代码进行定位查找的困难过程中，可以通过观察ESP的值进行对函数地址的定位，比如程序在调用&lt;strong&gt;encryptedFunction&lt;/strong&gt;函数时，会涉及到栈的操作，导致 ESP 的值发生有规律的变化。通过监测 ESP 的值变化，我们可以找到这些关键代码的执行点。&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;&lt;strong&gt;Example：&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;</summary>
+      
+      
+    <summary type="html">&lt;h1 id=&quot;ESP（扩展栈指针）&quot;&gt;&lt;a href=&quot;#ESP（扩展栈指针）&quot; class=&quot;headerlink&quot; title=&quot;ESP（扩展栈指针）&quot;&gt;&lt;/a&gt;&lt;em&gt;&lt;strong&gt;ESP（扩展栈指针）&lt;/strong&gt;&lt;/em&gt;&lt;/h1&gt;&lt;p&gt;&lt;em&gt;&lt;strong&gt;</summary>
+      
     
     
     
