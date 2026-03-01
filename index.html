@@ -766,6 +766,98 @@
 
                 
                     <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
+                        <a href="/2026/02/01/Ez%E5%B5%8C%E5%A5%97%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E7%9A%84%E6%A0%88%E5%B8%A7%E5%9B%9E%E6%BA%AF/">
+                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic%20/main/pic/20260106163356755.png" alt="Ez栈帧回溯" class="w-full h-full object-cover dark:brightness-75 transition-all" />
+                        </a>
+                    </div>
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
+                    <h3 class="home-article-title">
+                        <a href="/2026/02/01/Ez%E5%B5%8C%E5%A5%97%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E7%9A%84%E6%A0%88%E5%B8%A7%E5%9B%9E%E6%BA%AF/">
+                            Ez栈帧回溯
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            
+                            
+                                
+                                
+                            
+                            
+                            Ez栈帧回溯之前原理听了个七八十,也动手操作试着回溯的几次,当时效果不错,但一段时间之后还是犯难生疏,特此Record一下.
+实验情境(C++):
+1234567891011121314#include &lt;iostream&gt;#include &lt;windows.h&gt;// 无参无返void fun1()&#123;&#125;int main()&#123;	fun1();	return 0;&#125;
+
+以上是C++代码,一个简单的主函数调用fun1函数  (无参无返).
+我们直接在fun1打断点 (断电用×表示):
+1234567891011121314#include &lt;iostream&gt;#include &lt;windows.h&gt;// 无参无返void fun1() ×&#123;    &#125;int main()&#123;	fun1();	return 0;&#125;
+
+在反汇编中单步debug到图示位置:
+
+此时的栈帧状态如图:
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Sun Feb 01 2026 18:12:56 GMT+0800">
+                
+                    2026-02-01
+                
+            </span>
+        </span>
+        
+            <span class="home-article-category">
+                <i class="fa-solid fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/REVERSE/">REVERSE</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/Basics/">Basics</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2026/02/01/Ez%E5%B5%8C%E5%A5%97%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E7%9A%84%E6%A0%88%E5%B8%A7%E5%9B%9E%E6%BA%AF/">Read more<span class="seo-reader-text">Ez栈帧回溯</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+                    
+                
+
+                
+                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
                         <a href="/2026/01/03/DNS_Spoof/">
                             <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20260103172343701.png" alt="DNS Spoof" class="w-full h-full object-cover dark:brightness-75 transition-all" />
                         </a>
@@ -1642,92 +1734,6 @@ RSA算法的正确性基于数学证明，其中涉及到欧拉定理和模运..
                 </div>
             </li>
         
-            <li class="home-article-item">
-
-                
-
-                
-                    
-                
-
-                
-                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
-                        <a href="/2025/11/30/Pyrdp-convert%E8%B7%AF%E5%BE%84ErrorSolve/">
-                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251130163142894.png" alt="Pyrdp-convert路径Errorsolve" class="w-full h-full object-cover dark:brightness-75 transition-all" />
-                        </a>
-                    </div>
-                
-                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
-                    <h3 class="home-article-title">
-                        <a href="/2025/11/30/Pyrdp-convert%E8%B7%AF%E5%BE%84ErrorSolve/">
-                            Pyrdp-convert路径Errorsolve
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content markdown-body">
-                        
-                            
-                            
-                            
-                                
-                                
-                            
-                            
-                            Pyrdp-convert路径ErrorSolve1. 问题识别执行 pyrdp-convert rdp_dec.pcap -o out 命令时出现大量错误：
-123[-] Failed to handle data, continuing anyway: [Errno 2] No such file or directory: &#x27;D_\\Forensicstools\\envs\\out\\20170823082818_192.168.43.185_59921-192.168.43.130_3389.pyrdp&#x27;
-注意到路径中的 D: 被错误地替换为 D_ （冒号变成了下划线），导致系统无法找到正确的文件路径。
-2. 定位问题代码通过分析代码，我发现问题出在 d:\Forensicstools\envs\pyrdp\pyrdp\recording\recorder.py 文件中的 FileLayer 类：
-12self.filename = fileNameself.filename = str(self.filename).replace(&quot;:&...
-                        
-                    </div>
-
-                    <div class="home-article-meta-info-container">
-    <div class="home-article-meta-info">
-        <span><i class="fa-solid fa-calendars"></i>&nbsp;
-            <span class="home-article-date" data-date="Sun Nov 30 2025 12:12:57 GMT+0800">
-                
-                    2025-11-30
-                
-            </span>
-        </span>
-        
-            <span class="home-article-category">
-                <i class="fa-solid fa-folders"></i>&nbsp;
-            <ul>
-                
-                
-                    
-                        
-                        <li>
-                            <a href="/categories/Error/">Error</a>&nbsp;
-                        </li>
-                    
-                    
-                
-            </ul>
-        </span>
-        
-        
-            <span class="home-article-tag">
-                <i class="fa-solid fa-tags"></i>&nbsp;
-                <ul>
-                    
-                        <li>
-                            
-                            <a href="/tags/Error/">Error</a>&nbsp;
-                        </li>
-                    
-                </ul>
-            </span>
-        
-    </div>
-
-    <a href="/2025/11/30/Pyrdp-convert%E8%B7%AF%E5%BE%84ErrorSolve/">Read more<span class="seo-reader-text">Pyrdp-convert路径Errorsolve</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
-</div>
-
-                </div>
-            </li>
-        
     </ul>
 
     <div class="home-paginator px-7 py-5">
@@ -1758,7 +1764,7 @@ RSA算法的正确性基于数学证明，其中涉及到欧拉定理和模运..
                 
                 <p class="post-count space-x-0.5">
                     <span>
-                        19 posts in total
+                        20 posts in total
                     </span>
                     
                 </p>

@@ -663,6 +663,92 @@
 
                 
                     <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
+                        <a href="/2025/11/30/Pyrdp-convert%E8%B7%AF%E5%BE%84ErrorSolve/">
+                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251130163142894.png" alt="Pyrdp-convert路径Errorsolve" class="w-full h-full object-cover dark:brightness-75 transition-all" />
+                        </a>
+                    </div>
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
+                    <h3 class="home-article-title">
+                        <a href="/2025/11/30/Pyrdp-convert%E8%B7%AF%E5%BE%84ErrorSolve/">
+                            Pyrdp-convert路径Errorsolve
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            
+                            
+                                
+                                
+                            
+                            
+                            Pyrdp-convert路径ErrorSolve1. 问题识别执行 pyrdp-convert rdp_dec.pcap -o out 命令时出现大量错误：
+123[-] Failed to handle data, continuing anyway: [Errno 2] No such file or directory: &#x27;D_\\Forensicstools\\envs\\out\\20170823082818_192.168.43.185_59921-192.168.43.130_3389.pyrdp&#x27;
+注意到路径中的 D: 被错误地替换为 D_ （冒号变成了下划线），导致系统无法找到正确的文件路径。
+2. 定位问题代码通过分析代码，我发现问题出在 d:\Forensicstools\envs\pyrdp\pyrdp\recording\recorder.py 文件中的 FileLayer 类：
+12self.filename = fileNameself.filename = str(self.filename).replace(&quot;:&...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Sun Nov 30 2025 12:12:57 GMT+0800">
+                
+                    2025-11-30
+                
+            </span>
+        </span>
+        
+            <span class="home-article-category">
+                <i class="fa-solid fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/Error/">Error</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/Error/">Error</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2025/11/30/Pyrdp-convert%E8%B7%AF%E5%BE%84ErrorSolve/">Read more<span class="seo-reader-text">Pyrdp-convert路径Errorsolve</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+                    
+                
+
+                
+                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
                         <a href="/2025/11/30/EzUSB/">
                             <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251127100523716.png" alt="EzUSB" class="w-full h-full object-cover dark:brightness-75 transition-all" />
                         </a>
@@ -1642,7 +1728,7 @@ CPP：
                 
                 <p class="post-count space-x-0.5">
                     <span>
-                        19 posts in total
+                        20 posts in total
                     </span>
                     
                 </p>
