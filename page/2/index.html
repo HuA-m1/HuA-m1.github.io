@@ -663,6 +663,202 @@
 
                 
                     <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
+                        <a href="/2025/12/15/Tea/">
+                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251215233449385.png" alt="Tea" class="w-full h-full object-cover dark:brightness-75 transition-all" />
+                        </a>
+                    </div>
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
+                    <h3 class="home-article-title">
+                        <a href="/2025/12/15/Tea/">
+                            Tea
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            
+                            
+                                
+                                
+                            
+                            
+                            Tea（Tiny Encryption Algorithm）｜分组加密算法
+Basic Elements：
+
+
+
+参数
+说明
+
+
+
+明文
+64 比特（分为两个 32 位部分）
+
+
+密钥
+128 比特（分为 4 个 32 位部分）
+
+
+轮数
+64 次（32 轮循环，每轮包含两个半轮操作）
+
+
+常量
+delta = 0x9E3779B9 （即黄金分割常数的整数近似）
+
+
+首先，我们逐一对各个element进行分析解释：
+明文：明文长度不一定是64bit明文不是 64 位（不是 8 字节）怎么办？——必须填充（padding）到 8 字节的倍数。填充完之后再做处理。
+分组：明文填充（padding）到 8 字节的倍数需要分组。example：“helloctfgaoshou”，此字符串按照utf-8编码，标准的ASCII字符串的长度是15，很显然需要填充一个字符来达到8字节整数倍达到16字节。
+此处按PKCS7Padding模式，按块所缺个数填充值。例如：填充至符合块大小的整数倍，填充值为填充数量数，需要填充7个字节，就全部填07。
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Mon Dec 15 2025 22:12:57 GMT+0800">
+                
+                    2025-12-15
+                
+            </span>
+        </span>
+        
+            <span class="home-article-category">
+                <i class="fa-solid fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/Crypto/">Crypto</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/Basics/">Basics</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2025/12/15/Tea/">Read more<span class="seo-reader-text">Tea</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+                    
+                
+
+                
+                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
+                        <a href="/2025/12/15/RSA/">
+                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251215233449385.png" alt="RSA" class="w-full h-full object-cover dark:brightness-75 transition-all" />
+                        </a>
+                    </div>
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
+                    <h3 class="home-article-title">
+                        <a href="/2025/12/15/RSA/">
+                            RSA
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            
+                            
+                                
+                                
+                            
+                            
+                            RSARSA算法是一种非对称加密算法，它依赖于大数因子分解的难度，通过一对密钥（公钥和私钥）来实现数据的加密和解密。RSA算法的核心是两个大质数的选择和一系列数学运算。密钥生成过程
+RSA算法的密钥生成过程涉及以下步骤：选择两个大质数 (p) 和 (q)，并计算它们的乘积 (N &#x3D; p * q)，这个 (N) 将作为公钥和私钥的一部分。计算欧拉函数 (\Phi(N) &#x3D; (p-1) * (q-1))。选择一个整数 (e)，使得 (1 &lt; e &lt; \Phi(N)) 且 (e) 与 (\Phi(N)) 互质，这个 (e) 将作为公钥的另一部分。计算 (e) 的乘法逆元 (d)，使得 (d * e≡1(mod\Phi(N)))，这个 (d) 将作为私钥。加密和解密过程
+加密和解密的数学表达式分别为：加密：(C &#x3D; M^e \mod N)解密：(M &#x3D; C^d \mod N)其中，(M) 是明文，(C) 是密文，(e) 和 (N) 组成公钥，(d) 和 (N) 组成私钥。数学证明
+RSA算法的正确性基于数学证明，其中涉及到欧拉定理和模运...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Mon Dec 15 2025 21:12:57 GMT+0800">
+                
+                    2025-12-15
+                
+            </span>
+        </span>
+        
+            <span class="home-article-category">
+                <i class="fa-solid fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/Crypto/">Crypto</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/Basics/">Basics</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2025/12/15/RSA/">Read more<span class="seo-reader-text">RSA</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+                    
+                
+
+                
+                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
                         <a href="/2025/11/30/Pyrdp-convert%E8%B7%AF%E5%BE%84ErrorSolve/">
                             <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251130163142894.png" alt="Pyrdp-convert路径Errorsolve" class="w-full h-full object-cover dark:brightness-75 transition-all" />
                         </a>
@@ -1524,185 +1720,11 @@ libinput 默认步长过大： Linux 桌面默认按“行”滚动，而不是�
                 </div>
             </li>
         
-            <li class="home-article-item">
-
-                
-
-                
-                    
-                
-
-                
-                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
-                        <a href="/2025/10/28/evil_mcp/">
-                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251103142842039.png" alt="evil_mcp" class="w-full h-full object-cover dark:brightness-75 transition-all" />
-                        </a>
-                    </div>
-                
-                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
-                    <h3 class="home-article-title">
-                        <a href="/2025/10/28/evil_mcp/">
-                            evil_mcp
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content markdown-body">
-                        
-                            
-                            
-                            
-                                
-                                
-                            
-                            
-                            evil_mcp
-
-ez_AI：打开环境
-
-这里思路是编写一个脚本注入获取flag
-12345678910111213141516from typing import Any@tool(    name=&quot;get_flag&quot;,    description=&quot;Get the flag from the server&quot;,    input_schema=&#123;        &quot;type&quot;: &quot;object&quot;,        &quot;properties&quot;: &#123;&#125;,        &quot;required&quot;: []    &#125;)async def get_flag(arguments: dict[str, Any], context: Any) -&gt; Any:    &quot;&quot;&quot;Get the flag.&quot;&quot;&quot;    with open(&#x27;/flag&#x27;, &#x27...
-                        
-                    </div>
-
-                    <div class="home-article-meta-info-container">
-    <div class="home-article-meta-info">
-        <span><i class="fa-solid fa-calendars"></i>&nbsp;
-            <span class="home-article-date" data-date="Tue Oct 28 2025 12:12:57 GMT+0800">
-                
-                    2025-10-28
-                
-            </span>
-        </span>
-        
-            <span class="home-article-category">
-                <i class="fa-solid fa-folders"></i>&nbsp;
-            <ul>
-                
-                
-                    
-                        
-                        <li>
-                            <a href="/categories/AI/">AI</a>&nbsp;
-                        </li>
-                    
-                    
-                
-            </ul>
-        </span>
-        
-        
-            <span class="home-article-tag">
-                <i class="fa-solid fa-tags"></i>&nbsp;
-                <ul>
-                    
-                        <li>
-                            
-                            <a href="/tags/CTF/">CTF</a>&nbsp;
-                        </li>
-                    
-                </ul>
-            </span>
-        
-    </div>
-
-    <a href="/2025/10/28/evil_mcp/">Read more<span class="seo-reader-text">evil_mcp</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
-</div>
-
-                </div>
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                
-                    
-                
-
-                
-                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
-                        <a href="/2025/10/28/%E8%84%B1%E5%A3%B3ESP%EF%BC%88%E6%89%A9%E5%B1%95%E6%A0%88%E6%8C%87%E9%92%88%EF%BC%89%E5%AE%9A%E5%BE%8B/">
-                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251030104507280.png" alt="ESP定律" class="w-full h-full object-cover dark:brightness-75 transition-all" />
-                        </a>
-                    </div>
-                
-                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
-                    <h3 class="home-article-title">
-                        <a href="/2025/10/28/%E8%84%B1%E5%A3%B3ESP%EF%BC%88%E6%89%A9%E5%B1%95%E6%A0%88%E6%8C%87%E9%92%88%EF%BC%89%E5%AE%9A%E5%BE%8B/">
-                            ESP定律
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content markdown-body">
-                        
-                            
-                            
-                            
-                                
-                                
-                            
-                            
-                            ESP（扩展栈指针）principle：
-*在程序执行过程中，栈的操作与函数调用、局部变量存储等密切相关。当程序执行到某个函数调用时，会将函数的参数、返回地址等信息压入栈中，而 ESP 则始终指向栈顶。*X86 exp寄存器存储的是当前栈顶的内存地址。
-Function：
-ESP 定律的核心原理基于栈的平衡机制。在一些情况下，特别是在加密程序或存在代码保护机制的软件中，程序可能会对自身代码进行加密或混淆处理，使得直接分析原始代码变得困难。然而，当程序执行到特定关键代码段（如解密后的代码部分）时，通常会涉及到栈的操作，导致 ESP 的值发生有规律的变化。通过监测 ESP 的值变化，我们可以找到这些关键代码的执行点。
-CPP：
-123456789101112131415161718192021`#include &lt;iostream&gt;``void encryptedFunction() &#123;``// 这里假设是一些加密后的代码逻辑``std::cout &lt;&lt; &quot;This is the encrypted part of the code.&qu...
-                        
-                    </div>
-
-                    <div class="home-article-meta-info-container">
-    <div class="home-article-meta-info">
-        <span><i class="fa-solid fa-calendars"></i>&nbsp;
-            <span class="home-article-date" data-date="Tue Oct 28 2025 12:12:57 GMT+0800">
-                
-                    2025-10-28
-                
-            </span>
-        </span>
-        
-            <span class="home-article-category">
-                <i class="fa-solid fa-folders"></i>&nbsp;
-            <ul>
-                
-                
-                    
-                        
-                        <li>
-                            <a href="/categories/Reverse/">Reverse</a>&nbsp;
-                        </li>
-                    
-                    
-                
-            </ul>
-        </span>
-        
-        
-            <span class="home-article-tag">
-                <i class="fa-solid fa-tags"></i>&nbsp;
-                <ul>
-                    
-                        <li>
-                            
-                            <a href="/tags/CTF/">CTF</a>&nbsp;
-                        </li>
-                    
-                </ul>
-            </span>
-        
-    </div>
-
-    <a href="/2025/10/28/%E8%84%B1%E5%A3%B3ESP%EF%BC%88%E6%89%A9%E5%B1%95%E6%A0%88%E6%8C%87%E9%92%88%EF%BC%89%E5%AE%9A%E5%BE%8B/">Read more<span class="seo-reader-text">ESP定律</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
-</div>
-
-                </div>
-            </li>
-        
     </ul>
 
     <div class="home-paginator px-7 py-5">
         <div class="paginator">
-	<a class="extend prev" rel="prev" href="/"><i class="fa-regular fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+	<a class="extend prev" rel="prev" href="/"><i class="fa-regular fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa-regular fa-angle-right"></i></a>
 </div>
   
     </div>
@@ -1728,7 +1750,7 @@ CPP：
                 
                 <p class="post-count space-x-0.5">
                     <span>
-                        20 posts in total
+                        22 posts in total
                     </span>
                     
                 </p>

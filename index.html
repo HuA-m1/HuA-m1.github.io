@@ -761,6 +761,203 @@
                 
 
                 
+
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-7">
+                    <h3 class="home-article-title">
+                        <a href="/2026/05/30/%E6%9F%90%E8%BD%A6%E5%B9%B3%E5%8F%B0%E5%8F%8D%E5%8F%8D%E7%88%AC%E5%B0%8F%E8%AE%B0/">
+                            
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            
+                            
+                                
+                                
+                            
+                            
+                            某车平台各车型价格数据爬取反反爬(静态框架资源)​	说实话,没想到它会将价格这类数据以静态资源的形式放在html框架]中,但随之而来的就是稍显复杂的防护策略.
+​	没有基于常见的UA检测,也不是简单的Cookie携带就可以肆意,而是通过Cookie所含的参数失效性来判断是否属机器人&#x2F;程序行为.
+​	其实的质初步防护原理是以检测Cookie所携参数有效期为标准来判断自动化程序,若Cookie所携参数过期,由代理服务器发送html+js脚本到访问者浏览器上执行从而更新Cookie参数,若为一般化自动化程序,无法进行此操作.
+​	不得不说.此方法一定程度上减轻了服务器负载的同时还起到了很好的反自动化程序的效果.
+​	代理服务器检查Cookie,若在有效期内,放行，返回真实数据;Cookie过期或没有,则返回JS脚本页面,使得浏览器执行JS,生成新cookie,自动刷新页面,重新请求,杜绝了一般化的程序.
+12345678910111213141516 &lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;  &lt;meta charset...
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Sat May 30 2026 18:13:34 GMT+0800">
+                
+                    2026-05-30
+                
+            </span>
+        </span>
+        
+        
+    </div>
+
+    <a href="/2026/05/30/%E6%9F%90%E8%BD%A6%E5%B9%B3%E5%8F%B0%E5%8F%8D%E5%8F%8D%E7%88%AC%E5%B0%8F%E8%AE%B0/">Read more<span class="seo-reader-text"></span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
+                    
+                
+
+                
+                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
+                        <a href="/2026/03/20/SM4/">
+                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20260325194923466.png" alt="SM4" class="w-full h-full object-cover dark:brightness-75 transition-all" />
+                        </a>
+                    </div>
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
+                    <h3 class="home-article-title">
+                        <a href="/2026/03/20/SM4/">
+                            SM4
+                        </a>
+                    </h3>
+
+                    <div class="home-article-content markdown-body">
+                        
+                            
+                            
+                            
+                                
+                                
+                            
+                            
+                            SM4  EncryptionDesign Purpose
+
+
+国际算法
+国产对应
+
+
+
+AES
+SM4
+
+
+RSA &#x2F; ECC
+SM2
+
+
+SHA-256
+SM3
+
+
+显而易见，为了对标国外的加密算法，我国自主研发的 SM4 等系列算法在安全按等级上具有不降级和同等效力。拥有我国自主研发的加密算法并同时应用于我国实际商业等领域中具有重要意义。
+
+Introduction
+
+
+项目
+参数
+
+
+
+算法类型
+对称分组密码
+
+
+分组长度
+128 bit（16 字节）
+
+
+密钥长度
+128 bit（16 字节）
+
+
+轮数
+32 轮
+
+
+结构
+非平衡 Feistel 结构（SPN 思想）
+
+
+
+Process
+输入明文
+
+长度：128 bit
+
+拆分为 4 个 32 bit 数据：
+1X_i, X_&#123;i+1&#125;, X_&#123;i+2&#125;, X_&#123;i+3&#125;
+
+不足 128 bit → 模式填充
+示例：11 字节明文补 5 字节
+141 42 43 44 45 46 47 48 49 4A 4B 05 05 05 05 05
+
+
+
+                        
+                    </div>
+
+                    <div class="home-article-meta-info-container">
+    <div class="home-article-meta-info">
+        <span><i class="fa-solid fa-calendars"></i>&nbsp;
+            <span class="home-article-date" data-date="Fri Mar 20 2026 12:15:57 GMT+0800">
+                
+                    2026-03-20
+                
+            </span>
+        </span>
+        
+            <span class="home-article-category">
+                <i class="fa-solid fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/Crypto/">Crypto</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/Basics/">Basics</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
+        
+    </div>
+
+    <a href="/2026/03/20/SM4/">Read more<span class="seo-reader-text">SM4</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+</div>
+
+                </div>
+            </li>
+        
+            <li class="home-article-item">
+
+                
+
+                
                     
                 
 
@@ -1538,207 +1735,11 @@ XXTEA
                 </div>
             </li>
         
-            <li class="home-article-item">
-
-                
-
-                
-                    
-                
-
-                
-                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
-                        <a href="/2025/12/15/Tea/">
-                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251215233449385.png" alt="Tea" class="w-full h-full object-cover dark:brightness-75 transition-all" />
-                        </a>
-                    </div>
-                
-                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
-                    <h3 class="home-article-title">
-                        <a href="/2025/12/15/Tea/">
-                            Tea
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content markdown-body">
-                        
-                            
-                            
-                            
-                                
-                                
-                            
-                            
-                            Tea（Tiny Encryption Algorithm）｜分组加密算法
-Basic Elements：
-
-
-
-参数
-说明
-
-
-
-明文
-64 比特（分为两个 32 位部分）
-
-
-密钥
-128 比特（分为 4 个 32 位部分）
-
-
-轮数
-64 次（32 轮循环，每轮包含两个半轮操作）
-
-
-常量
-delta = 0x9E3779B9 （即黄金分割常数的整数近似）
-
-
-首先，我们逐一对各个element进行分析解释：
-明文：明文长度不一定是64bit明文不是 64 位（不是 8 字节）怎么办？——必须填充（padding）到 8 字节的倍数。填充完之后再做处理。
-分组：明文填充（padding）到 8 字节的倍数需要分组。example：“helloctfgaoshou”，此字符串按照utf-8编码，标准的ASCII字符串的长度是15，很显然需要填充一个字符来达到8字节整数倍达到16字节。
-此处按PKCS7Padding模式，按块所缺个数填充值。例如：填充至符合块大小的整数倍，填充值为填充数量数，需要填充7个字节，就全部填07。
-                        
-                    </div>
-
-                    <div class="home-article-meta-info-container">
-    <div class="home-article-meta-info">
-        <span><i class="fa-solid fa-calendars"></i>&nbsp;
-            <span class="home-article-date" data-date="Mon Dec 15 2025 22:12:57 GMT+0800">
-                
-                    2025-12-15
-                
-            </span>
-        </span>
-        
-            <span class="home-article-category">
-                <i class="fa-solid fa-folders"></i>&nbsp;
-            <ul>
-                
-                
-                    
-                        
-                        <li>
-                            <a href="/categories/Crypto/">Crypto</a>&nbsp;
-                        </li>
-                    
-                    
-                
-            </ul>
-        </span>
-        
-        
-            <span class="home-article-tag">
-                <i class="fa-solid fa-tags"></i>&nbsp;
-                <ul>
-                    
-                        <li>
-                            
-                            <a href="/tags/Basics/">Basics</a>&nbsp;
-                        </li>
-                    
-                </ul>
-            </span>
-        
-    </div>
-
-    <a href="/2025/12/15/Tea/">Read more<span class="seo-reader-text">Tea</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
-</div>
-
-                </div>
-            </li>
-        
-            <li class="home-article-item">
-
-                
-
-                
-                    
-                
-
-                
-                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
-                        <a href="/2025/12/15/RSA/">
-                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20251215233449385.png" alt="RSA" class="w-full h-full object-cover dark:brightness-75 transition-all" />
-                        </a>
-                    </div>
-                
-                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
-                    <h3 class="home-article-title">
-                        <a href="/2025/12/15/RSA/">
-                            RSA
-                        </a>
-                    </h3>
-
-                    <div class="home-article-content markdown-body">
-                        
-                            
-                            
-                            
-                                
-                                
-                            
-                            
-                            RSARSA算法是一种非对称加密算法，它依赖于大数因子分解的难度，通过一对密钥（公钥和私钥）来实现数据的加密和解密。RSA算法的核心是两个大质数的选择和一系列数学运算。密钥生成过程
-RSA算法的密钥生成过程涉及以下步骤：选择两个大质数 (p) 和 (q)，并计算它们的乘积 (N &#x3D; p * q)，这个 (N) 将作为公钥和私钥的一部分。计算欧拉函数 (\Phi(N) &#x3D; (p-1) * (q-1))。选择一个整数 (e)，使得 (1 &lt; e &lt; \Phi(N)) 且 (e) 与 (\Phi(N)) 互质，这个 (e) 将作为公钥的另一部分。计算 (e) 的乘法逆元 (d)，使得 (d * e≡1(mod\Phi(N)))，这个 (d) 将作为私钥。加密和解密过程
-加密和解密的数学表达式分别为：加密：(C &#x3D; M^e \mod N)解密：(M &#x3D; C^d \mod N)其中，(M) 是明文，(C) 是密文，(e) 和 (N) 组成公钥，(d) 和 (N) 组成私钥。数学证明
-RSA算法的正确性基于数学证明，其中涉及到欧拉定理和模运...
-                        
-                    </div>
-
-                    <div class="home-article-meta-info-container">
-    <div class="home-article-meta-info">
-        <span><i class="fa-solid fa-calendars"></i>&nbsp;
-            <span class="home-article-date" data-date="Mon Dec 15 2025 21:12:57 GMT+0800">
-                
-                    2025-12-15
-                
-            </span>
-        </span>
-        
-            <span class="home-article-category">
-                <i class="fa-solid fa-folders"></i>&nbsp;
-            <ul>
-                
-                
-                    
-                        
-                        <li>
-                            <a href="/categories/Crypto/">Crypto</a>&nbsp;
-                        </li>
-                    
-                    
-                
-            </ul>
-        </span>
-        
-        
-            <span class="home-article-tag">
-                <i class="fa-solid fa-tags"></i>&nbsp;
-                <ul>
-                    
-                        <li>
-                            
-                            <a href="/tags/Basics/">Basics</a>&nbsp;
-                        </li>
-                    
-                </ul>
-            </span>
-        
-    </div>
-
-    <a href="/2025/12/15/RSA/">Read more<span class="seo-reader-text">RSA</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
-</div>
-
-                </div>
-            </li>
-        
     </ul>
 
     <div class="home-paginator px-7 py-5">
         <div class="paginator">
-	<span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa-regular fa-angle-right"></i></a>
+	<span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa-regular fa-angle-right"></i></a>
 </div>
   
     </div>
@@ -1764,7 +1765,7 @@ RSA算法的正确性基于数学证明，其中涉及到欧拉定理和模运..
                 
                 <p class="post-count space-x-0.5">
                     <span>
-                        20 posts in total
+                        22 posts in total
                     </span>
                     
                 </p>
