@@ -761,12 +761,20 @@
                 
 
                 
+                    
+                
 
                 
-                <div class="flex flex-col gap-5 px-7 pb-7 pt-7">
+                    <div id="home-article-thumbnail" class="home-article-thumbnail relative h-[150px] overflow-hidden rounded-t-large">
+                        <a href="/2026/05/30/%E6%9F%90%E8%BD%A6%E5%B9%B3%E5%8F%B0%E5%8F%8D%E5%8F%8D%E7%88%AC%E5%B0%8F%E8%AE%B0/">
+                            <img src="https://raw.githubusercontent.com/HuA-m1/Pic/main/pic/20260530181951865.png" alt="反反爬小记" class="w-full h-full object-cover dark:brightness-75 transition-all" />
+                        </a>
+                    </div>
+                
+                <div class="flex flex-col gap-5 px-7 pb-7 pt-5">
                     <h3 class="home-article-title">
                         <a href="/2026/05/30/%E6%9F%90%E8%BD%A6%E5%B9%B3%E5%8F%B0%E5%8F%8D%E5%8F%8D%E7%88%AC%E5%B0%8F%E8%AE%B0/">
-                            
+                            反反爬小记
                         </a>
                     </h3>
 
@@ -779,34 +787,57 @@
                                 
                             
                             
-                            title: 反反爬小记
-date: 2026-05-30 18:16:18
-tags: Preferences
-categories: Web
-thumbnail: https://raw.githubusercontent.com/HuA-m1/Pic /main/pic/20260530181951865.png
-
-某车平台爬取反反爬小记(静态框架资源)​	说实话,没想到它会将价格这类数据以静态资源的形式放在html框架]中,但随之而来的就是稍显复杂的防护策略.
+                            某车平台爬取反反爬小记(静态框架资源)​	说实话,没想到它会将价格这类数据以静态资源的形式放在html框架]中,但随之而来的就是稍显复杂的防护策略.
 ​	没有基于常见的UA检测,也不是简单的Cookie携带就可以肆意,而是通过Cookie所含的参数失效性来判断是否属机器人&#x2F;程序行为.
 ​	其实的质初步防护原理是以检测Cookie所携参数有效期为标准来判断自动化程序,若Cookie所携参数过期,由代理服务器发送html+js脚本到访问者浏览器上执行从而更新Cookie参数,若为一般化自动化程序,无法进行此操作.
 ​	不得不说.此方法一定程度上减轻了服务器负载的同时还起到了很好的反自动化程序的效果.
-​	代理服务器检查Cookie,若在有效期内,放行，返回...
+​	代理服务器检查Cookie,若在有效期内,放行，返回真实数据;Cookie过期或没有,则返回JS脚本页面,使得浏览器执行JS,生成新cookie,自动刷新页面,重新请求,杜绝了一般化的程序.
+12345678910111213141516 &lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;  &lt;meta charset=&quo...
                         
                     </div>
 
                     <div class="home-article-meta-info-container">
     <div class="home-article-meta-info">
         <span><i class="fa-solid fa-calendars"></i>&nbsp;
-            <span class="home-article-date" data-date="Sat May 30 2026 18:13:34 GMT+0800">
+            <span class="home-article-date" data-date="Sat May 30 2026 18:16:18 GMT+0800">
                 
                     2026-05-30
                 
             </span>
         </span>
         
+            <span class="home-article-category">
+                <i class="fa-solid fa-folders"></i>&nbsp;
+            <ul>
+                
+                
+                    
+                        
+                        <li>
+                            <a href="/categories/Web/">Web</a>&nbsp;
+                        </li>
+                    
+                    
+                
+            </ul>
+        </span>
+        
+        
+            <span class="home-article-tag">
+                <i class="fa-solid fa-tags"></i>&nbsp;
+                <ul>
+                    
+                        <li>
+                            
+                            <a href="/tags/Preferences/">Preferences</a>&nbsp;
+                        </li>
+                    
+                </ul>
+            </span>
         
     </div>
 
-    <a href="/2026/05/30/%E6%9F%90%E8%BD%A6%E5%B9%B3%E5%8F%B0%E5%8F%8D%E5%8F%8D%E7%88%AC%E5%B0%8F%E8%AE%B0/">Read more<span class="seo-reader-text"></span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
+    <a href="/2026/05/30/%E6%9F%90%E8%BD%A6%E5%B9%B3%E5%8F%B0%E5%8F%8D%E5%8F%8D%E7%88%AC%E5%B0%8F%E8%AE%B0/">Read more<span class="seo-reader-text">反反爬小记</span>&nbsp;<i class="fa-solid fa-angle-right"></i></a>
 </div>
 
                 </div>
